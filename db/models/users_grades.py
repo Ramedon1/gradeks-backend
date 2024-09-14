@@ -6,7 +6,6 @@ from sqlalchemy.testing.suite.test_reflection import users
 from sqlmodel import Field, SQLModel
 
 
-
 class Users_grades(SQLModel, table=True):
     """
     Данные о оценках пользователя.
@@ -17,6 +16,7 @@ class Users_grades(SQLModel, table=True):
         subject (str): название предмета, по которому стоит оценка
         grade (int): оценка
         grade_wight (int): вес оценки, используется для расчета средней оценки
+        long_name (str | None): полное название оценки
     """
 
     __tablename__ = "users_grades"
@@ -27,5 +27,3 @@ class Users_grades(SQLModel, table=True):
     grade: int = Field(default=None, nullable=True)
     grade_wight = int = Field(default=None, nullable=True)
     long_name: str | None = Field(default=None, nullable=True)
-
-

@@ -2,10 +2,10 @@ import uuid
 from datetime import datetime
 
 from pydantic import UUID4
-from sqlalchemy import BIGINT, UUID, Column, ForeignKey
-from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy import UUID
+from sqlmodel import Field, SQLModel
 
-from common import CreatedAtField
+from common.common import CreatedAtField
 
 
 class User(SQLModel, table=True):
@@ -20,6 +20,7 @@ class User(SQLModel, table=True):
         username (str | None): username в телеге, если есть
         telegram_hash (str | None): хэш для авторизации пользователя в телеге
         created_at (datetime): время создания пользователя
+        diary_link (bool): подключен ли электронный дневник
     """
 
     __tablename__ = "users"
@@ -32,6 +33,6 @@ class User(SQLModel, table=True):
     last_name: str | None = Field(nullable=True, default=None, max_length=255)
     username: str | None = Field(nullable=True, default=None, max_length=255)
     created_at: datetime = CreatedAtField(index=True)
-
+    diary_link: bool = Field(default=False, nullable=False)
     # Telegram Auth
     telegram_hash: str = Field(nullable=False, default=None, max_length=255)

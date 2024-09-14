@@ -4,7 +4,6 @@ from sqlalchemy.testing.suite.test_reflection import users
 from sqlmodel import Field, SQLModel
 
 
-
 class Users_grades_finally(SQLModel, table=True):
     """
     Данные о оценках пользователя.
@@ -22,4 +21,3 @@ class Users_grades_finally(SQLModel, table=True):
     quarter: str = Field(default=None, nullable=True)
     subject: str = Field(default=None, nullable=True)
     grade: int = Field(default=None, nullable=True)
-

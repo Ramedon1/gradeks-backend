@@ -12,4 +12,3 @@ POSTGRES_DB = os.getenv("POSTGRES_DB", "gradeks")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "user")
 POSTGRES_PASS = os.getenv("POSTGRES_PASS", "password")
 POSTGRES_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASS}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-

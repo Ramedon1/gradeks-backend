@@ -1,6 +1,4 @@
-import uuid
 from contextlib import asynccontextmanager
-from functools import wraps
 from typing import TYPE_CHECKING, AsyncIterator, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -17,7 +15,7 @@ class DbManagerBase:
 
     @asynccontextmanager
     async def session_manager(
-            self, outer_session: AsyncSession | None = None
+        self, outer_session: AsyncSession | None = None
     ) -> AsyncIterator[AsyncSession]:
         session = outer_session or self.session()
         if not outer_session:

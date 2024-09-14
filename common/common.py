@@ -1,9 +1,11 @@
+from datetime import UTC, datetime
+
 from sqlmodel import Field
 
-from datetime import UTC, datetime
 
 def pg_now() -> datetime:
     return datetime.now().astimezone(UTC).replace(tzinfo=None)
+
 
 def CreatedAtField(index=False):  # noqa
     return Field(

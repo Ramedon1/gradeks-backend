@@ -3,7 +3,6 @@ from sqlalchemy import UUID
 from sqlmodel import Field, SQLModel
 
 
-
 class Distribution(SQLModel, table=True):
     """
     Данные о рассылке пользователям
