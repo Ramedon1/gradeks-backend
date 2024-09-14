@@ -10,7 +10,7 @@ from db.models.users_grades_finally import Users_grades_finally
 
 
 class DbManagerUsers(DbManagerBase):
-    async def get_grades(
+    async def get_grades_by_user(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> list[Users_grades]:
         async with self.session_manager(outer_session) as session:
