@@ -8,7 +8,7 @@ from db.manager.base import DbManagerBase
 from db.models.distribution import Distribution
 
 
-class DbManagerUsers(DbManagerBase):
+class DbManagerDistribution(DbManagerBase):
     async def get_distribution(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> Distribution | None:
@@ -21,7 +21,7 @@ class DbManagerUsers(DbManagerBase):
 
             return distribution
 
-    async def get_distribution_users(
+    async def get_distribution_users_active(
         self,
         user_id: str | UUID,
         distribution_type: str,

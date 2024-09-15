@@ -20,7 +20,9 @@ class User(SQLModel, table=True):
         username (str | None): username в телеге, если есть
         telegram_hash (str | None): хэш для авторизации пользователя в телеге
         created_at (datetime): время создания пользователя
+        diary_id (str): идентификатор пользователя в электронном дневнике
         diary_link (bool): подключен ли электронный дневник
+        is_active (bool): активен ли пользователь
     """
 
     __tablename__ = "users"
@@ -33,6 +35,8 @@ class User(SQLModel, table=True):
     last_name: str | None = Field(nullable=True, default=None, max_length=255)
     username: str | None = Field(nullable=True, default=None, max_length=255)
     created_at: datetime = CreatedAtField(index=True)
+    diary_id: str | None = Field(default=None, nullable=True)
     diary_link: bool = Field(default=False, nullable=False)
+    is_active: bool = Field(nullable=False, default=True)
     # Telegram Auth
     telegram_hash: str = Field(nullable=False, default=None, max_length=255)

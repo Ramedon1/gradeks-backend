@@ -52,3 +52,12 @@ class DbManagerUsers(DbManagerBase):
             user = result.one_or_none()
 
             return user
+
+    async def get_user_by_telegram_id(
+        self, telegram_id: int, outer_session: AsyncSession | None = None
+    ) -> User | None:
+        async with self.session_manager(outer_session) as session:  # type: AsyncSession   # fmt: skip
+            statement = select(User).where(User.telegram_id == telegram_id)
+            result = await session.exec(statement)  # type: ignore
+            user = result.one_or_none()
+            return user

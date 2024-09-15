@@ -9,7 +9,7 @@ from db.models.users_grades import Users_grades
 from db.models.users_grades_finally import Users_grades_finally
 
 
-class DbManagerUsers(DbManagerBase):
+class DbManagerGrades(DbManagerBase):
     async def get_grades_by_user(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> list[Users_grades]:
