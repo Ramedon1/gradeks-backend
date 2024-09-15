@@ -17,7 +17,7 @@ class DbManagerDistribution(DbManagerBase):
                 Distribution.user_id == user_id
             )
             result = await session.exec(statement)
-            distribution = result.one_or_none()
+            distribution = result.all()
 
             return distribution
 
