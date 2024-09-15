@@ -1,7 +1,7 @@
-import json
 from datetime import datetime
+from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict
 
 
 class GradesInfo(BaseModel):
@@ -13,6 +13,7 @@ class GradesInfo(BaseModel):
 
 
 class ReferralInfo(BaseModel):
+    user_id: UUID
     invited_by: str
 
 
@@ -27,7 +28,6 @@ class DistributionInfo(BaseModel):
 
 
 class UserInfo(BaseModel):
-    user_id: int
     diary: DiaryInfo | None = None
     grades: list[GradesInfo] | None = None
     distribution: list[DistributionInfo] | None = None

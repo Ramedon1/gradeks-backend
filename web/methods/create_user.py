@@ -4,7 +4,6 @@ from web.models.users.telegram import WebAppInitData
 
 
 async def create_user(telegram_data: WebAppInitData) -> User:
-
     user = await db_manager.users.create_user(
         telegram_id=telegram_data.user.id,
         first_name=telegram_data.user.first_name,
@@ -26,7 +25,7 @@ async def create_user(telegram_data: WebAppInitData) -> User:
             invited_by_id = user.user_id
 
     await db_manager.referral.set_referral(
-        user_id=telegram_data.user.id, invited_by=invited_by_id
+        user_id=user.user_id, invited_by=invited_by_id
     )
 
     return user

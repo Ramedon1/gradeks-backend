@@ -1,4 +1,5 @@
 import uuid
+from uuid import UUID
 
 from sqlmodel import Field, SQLModel
 
@@ -16,5 +17,5 @@ class Referral(SQLModel, table=True):
 
     __tablename__ = "referrals"
 
-    user_id: int = Field(foreign_key=User.user_id, primary_key=True)
+    user_id: UUID = Field(foreign_key=User.user_id, primary_key=True)
     invited_by: int | None = Field(default_factory=uuid.uuid4)
