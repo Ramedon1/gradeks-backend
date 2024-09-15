@@ -1,16 +1,11 @@
 import asyncio
 
-from web.methods.get_user_info import (
-    get_user_buffs,
-    get_user_leagues,
-    get_user_missions,
-    get_user_ref_level_program,
-    get_user_referrals,
-    get_user_stats,
-    get_user_ultimates,
-    get_global_stat,
-    get_buff_prices,
-)
+from web.methods.get_user_info import (get_buff_prices, get_global_stat,
+                                       get_user_buffs, get_user_leagues,
+                                       get_user_missions,
+                                       get_user_ref_level_program,
+                                       get_user_referrals, get_user_stats,
+                                       get_user_ultimates)
 from web.models.users.user import UserInfo
 
 

@@ -25,7 +25,8 @@ async def create_user(telegram_data: WebAppInitData) -> User:
         if user is not None:
             invited_by_id = user.user_id
 
-    await db_manager.referral.set_referral(user_id=telegram_data.user.id, invited_by=invited_by_id)
-
+    await db_manager.referral.set_referral(
+        user_id=telegram_data.user.id, invited_by=invited_by_id
+    )
 
     return user

@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
-from db.manager.users import DbManagerUsers
+from db.manager.distribution import DbManagerDistribution
 from db.manager.grades import DbManagerGrades
 from db.manager.referral import DbManagerReferrals
-from db.manager.distribution import DbManagerDistribution
+from db.manager.users import DbManagerUsers
 from db.session import engine
 
 
@@ -17,7 +17,9 @@ class DbManager:
         self.engine = db_engine
         self.users: DbManagerUsers = DbManagerUsers(db_engine, self)
         self.grades: DbManagerGrades = DbManagerGrades(db_engine, self)
-        self.distribution: DbManagerDistribution = DbManagerDistribution(db_engine, self)
+        self.distribution: DbManagerDistribution = DbManagerDistribution(
+            db_engine, self
+        )
         self.base: DbManagerBase = DbManagerBase(db_engine, self)
         self.referral: DbManagerReferrals = DbManagerReferrals(db_engine, self)
 

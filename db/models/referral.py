@@ -1,6 +1,7 @@
 import uuid
 
 from sqlmodel import Field, SQLModel
+
 from db.models.users import User
 
 

@@ -38,8 +38,6 @@ async def get_me(user_id: Annotated[str, Depends(current_user_id)]) -> UserInfo:
     user = await db_manager.users.get_user(user_id)
 
     if user.is_active is False:
-        return UserInfo(
-            is_active=user.is_active
-        )
+        return UserInfo(is_active=user.is_active)
 
     return await fetch_user_data(user_id)

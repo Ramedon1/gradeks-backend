@@ -33,11 +33,13 @@ class DbManagerUsers(DbManagerBase):
 
             return new_user
 
-    async def get_diary_link(
+    async def get_diary_info(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> bool:
         async with self.session_manager(outer_session) as session:
-            statement = select(User.diary_link).where(User.user_id == user_id)
+            statement = select(User.diary_link, User.diary_id).where(
+                User.user_id == user_id
+            )
             result = await session.exec(statement)
             user = result.one_or_none()
 
