@@ -5,16 +5,16 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
-from db.models.users_grades import Users_grades
-from db.models.users_grades_finally import Users_grades_finally
+from db.models.grades import Grades
+from db.models.grades_finally import GradesFinally
 
 
 class DbManagerGrades(DbManagerBase):
     async def get_grades_by_user(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
-    ) -> list[Users_grades]:
+    ) -> list[Grades]:
         async with self.session_manager(outer_session) as session:
-            statement = select(Users_grades).where(Users_grades.user_id == user_id)
+            statement = select(Grades).where(Grades.user_id == user_id)
             result = await session.exec(statement)
             grades = result.all()
 
@@ -26,13 +26,13 @@ class DbManagerGrades(DbManagerBase):
         start_date: datetime | str,
         end_date: datetime | str,
         outer_session: AsyncSession | None = None,
-    ) -> list[Users_grades]:
+    ) -> list[Grades]:
         async with self.session_manager(outer_session) as session:
             statement = (
-                select(Users_grades)
-                .where(Users_grades.user_id == user_id)
-                .where(Users_grades.grading_date >= start_date)
-                .where(Users_grades.grading_date <= end_date)
+                select(Grades)
+                .where(Grades.user_id == user_id)
+                .where(Grades.grading_date >= start_date)
+                .where(Grades.grading_date <= end_date)
             )
             result = await session.exec(statement)
             grades = result.all()
@@ -41,12 +41,12 @@ class DbManagerGrades(DbManagerBase):
 
     async def get_grades_by_subject(
         self, user_id: str | UUID, subject: str
-    ) -> list[Users_grades]:
+    ) -> list[Grades]:
         async with self.session_manager() as session:
             statement = (
-                select(Users_grades)
-                .where(Users_grades.user_id == user_id)
-                .where(Users_grades.subject == subject)
+                select(Grades)
+                .where(Grades.user_id == user_id)
+                .where(Grades.subject == subject)
             )
             result = await session.exec(statement)
             grades = result.all()
@@ -55,12 +55,12 @@ class DbManagerGrades(DbManagerBase):
 
     async def get_grades_by_quarter(
         self, user_id: str | UUID, quarter: str
-    ) -> list[Users_grades_finally]:
+    ) -> list[GradesFinally]:
         async with self.session_manager() as session:
             statement = (
-                select(Users_grades_finally)
-                .where(Users_grades_finally.user_id == user_id)
-                .where(Users_grades_finally.quarter == quarter)
+                select(GradesFinally)
+                .where(GradesFinally.user_id == user_id)
+                .where(GradesFinally.quarter == quarter)
             )
             result = await session.exec(statement)
             grades = result.all()

@@ -6,7 +6,7 @@ from sqlalchemy.testing.suite.test_reflection import users
 from sqlmodel import Field, SQLModel
 
 
-class Users_grades(SQLModel, table=True):
+class Grades(SQLModel, table=True):
     """
     Данные о оценках пользователя.
 
@@ -19,7 +19,7 @@ class Users_grades(SQLModel, table=True):
         long_name (str | None): полное название оценки
     """
 
-    __tablename__ = "users_grades"
+    __tablename__ = "grades"
 
     user_id: UUID4 = Field(foreign_key=users.user_id, primary_key=True)
     grading_date: datetime = Field(default=None, nullable=True)
