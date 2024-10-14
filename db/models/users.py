@@ -23,6 +23,7 @@ class User(SQLModel, table=True):
         diary_id (str): идентификатор пользователя в электронном дневнике
         diary_link (bool): подключен ли электронный дневник
         is_active (bool): активен ли пользователь
+        grade_type (str): тип четвертных оценок, которые пользователь выбрал
     """
 
     __tablename__ = "users"
@@ -38,5 +39,6 @@ class User(SQLModel, table=True):
     diary_id: str | None = Field(default=None, nullable=True)
     diary_link: bool = Field(default=False, nullable=False)
     is_active: bool = Field(nullable=False, default=True)
+    grade_type: str = Field(default="new", nullable=False)
     # Telegram Auth
     telegram_hash: str = Field(nullable=False, default=None, max_length=255)
