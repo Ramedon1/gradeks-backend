@@ -13,8 +13,10 @@ POSTGRES_USER = os.getenv("POSTGRES_USER", "user")
 POSTGRES_PASS = os.getenv("POSTGRES_PASS", "password")
 POSTGRES_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASS}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
-REDIS_HOST = "85.159.231.208"
-REDIS_PORT = "6380"
-REDIS_USER = "gradeks"
-REDIS_PASS = "IASHduiUWhHUSIAH1287381hdisa95utj90ez"
+REDIS_HOST = os.getenv("REDIS_HOST", "")
+REDIS_PORT = os.getenv("REDIS_PORT", "")
+REDIS_USER = os.getenv("REDIS_USER", "")
+REDIS_PASS = os.getenv("REDIS_PASS", "")
 REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+
+WEB_UI_URL = os.getenv("WEB_UI_URL", "")

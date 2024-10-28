@@ -1,9 +1,7 @@
 import uuid
-from uuid import UUID
 
+from pydantic import UUID4
 from sqlmodel import Field, SQLModel
-
-from db.models.users import User
 
 
 class Referral(SQLModel, table=True):
@@ -17,5 +15,5 @@ class Referral(SQLModel, table=True):
 
     __tablename__ = "referrals"
 
-    user_id: UUID = Field(foreign_key=User.user_id, primary_key=True)
+    user_id: UUID4 = Field(foreign_key="users.user_id", primary_key=True)
     invited_by: int | None = Field(default_factory=uuid.uuid4)

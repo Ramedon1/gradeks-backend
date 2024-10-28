@@ -3,7 +3,7 @@ from db.models.users import User
 from web.models.users.telegram import WebAppInitData
 
 
-async def create_user(telegram_data: WebAppInitData) -> User:
+async def create_users(telegram_data: WebAppInitData) -> User:
     user = await db_manager.users.create_user(
         telegram_id=telegram_data.user.id,
         first_name=telegram_data.user.first_name,
@@ -12,20 +12,6 @@ async def create_user(telegram_data: WebAppInitData) -> User:
         telegram_hash=telegram_data.hash,
     )
 
-    invited_by_id = None
-
-    if telegram_data.start_param is not None and telegram_data.start_param.startswith(
-        "r_"
-    ):
-        invited_by_tg_id = telegram_data.start_param.replace("r_", "")
-        user = await db_manager.users.get_user_by_telegram_id(
-            telegram_id=int(invited_by_tg_id)
-        )
-        if user is not None:
-            invited_by_id = user.user_id
-
-    await db_manager.referral.set_referral(
-        user_id=user.user_id, invited_by=invited_by_id
-    )
+    await db_manager.distribution.create_distributions_user(user_id=user.user_id)
 
     return user

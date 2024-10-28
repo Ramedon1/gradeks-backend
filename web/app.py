@@ -6,9 +6,13 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 import settings
+from common import context_logger
 from common.context_logger import SpanId, TraceId
+from web.routes.distribution import distribution_router
+from web.routes.grade import grade_router
+from web.routes.users import user_router
 
-# Здесь прописать роуты чтобы потом иметь доступ к им доксам
+logger = context_logger.get(__name__)
 
 fastapi_app = FastAPI()
 
@@ -27,6 +31,11 @@ async def add_process_time_header_and_trace_id(request: Request, call_next):
     TraceId.reset(trace_id_token)
     SpanId.reset(span_id_token)
     return response
+
+
+fastapi_app.include_router(user_router)
+fastapi_app.include_router(distribution_router)
+fastapi_app.include_router(grade_router)
 
 
 origins = [

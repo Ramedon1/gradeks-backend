@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from sqlmodel import select
@@ -6,7 +6,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
 from db.models.grades import Grades
-from db.models.grades_finally import GradesFinally
 
 
 class DbManagerGrades(DbManagerBase):
@@ -54,13 +53,16 @@ class DbManagerGrades(DbManagerBase):
             return grades
 
     async def get_grades_by_quarter(
-        self, user_id: str | UUID, quarter: str
-    ) -> list[GradesFinally]:
+        self, user_id: str | UUID, quarter_date_start: date, quarter_date_end: date
+    ) -> list[Grades]:
         async with self.session_manager() as session:
             statement = (
-                select(GradesFinally)
-                .where(GradesFinally.user_id == user_id)
-                .where(GradesFinally.quarter == quarter)
+                select(Grades)
+                .where(Grades.user_id == user_id)
+                .where(
+                    (Grades.grading_date >= quarter_date_start)
+                    & (Grades.grading_date <= quarter_date_end)
+                )
             )
             result = await session.exec(statement)
             grades = result.all()

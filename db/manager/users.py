@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from sqlalchemy import update
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
 from db.models.users import User
+from web.models.users.user import SpecDiaryInfo
 
 
 class DbManagerUsers(DbManagerBase):
@@ -33,17 +35,23 @@ class DbManagerUsers(DbManagerBase):
 
             return new_user
 
-    async def get_diary_info(
+    async def get_spec_diary_info(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
-    ) -> bool:
+    ) -> SpecDiaryInfo:
         async with self.session_manager(outer_session) as session:
-            statement = select(User.diary_link, User.diary_id).where(
-                User.user_id == user_id
-            )
-            result = await session.exec(statement)
-            user = result.one_or_none()
+            diary_link = (
+                await session.exec(
+                    select(User.diary_link).where(User.user_id == user_id)
+                )
+            ).one()
+            diary_id = (
+                await session.exec(select(User.diary_id).where(User.user_id == user_id))
+            ).one()
 
-            return user
+            return SpecDiaryInfo(
+                diary_link=diary_link,
+                diary_id=diary_id,
+            )
 
     async def get_user(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
@@ -63,3 +71,47 @@ class DbManagerUsers(DbManagerBase):
             result = await session.exec(statement)  # type: ignore
             user = result.one_or_none()
             return user
+
+    async def get_grade_type(
+        self, user_id: str | UUID, outer_session: AsyncSession | None = None
+    ) -> str:
+        async with self.session_manager(outer_session) as session:
+            grade_type = (
+                await session.exec(
+                    select(User.grade_type).where(User.user_id == user_id)
+                )
+            ).one_or_none()
+
+            return grade_type
+
+    async def change_grade_type(
+        self,
+        user_id: str | UUID,
+        grade_type: str,
+        outer_session: AsyncSession | None = None,
+    ) -> str:
+        async with self.session_manager(outer_session) as session:
+            statement = (
+                update(User)
+                .where(User.user_id == user_id)
+                .values(grade_type=grade_type)
+            )
+            await session.exec(statement)
+            await session.commit()
+
+            return grade_type
+
+    async def connect_diary(
+        self,
+        user_id: str | UUID,
+        diary_id: str,
+        outer_session: AsyncSession | None = None,
+    ):
+        async with self.session_manager(outer_session) as session:  # type: AsyncSession   # fmt: skip
+            statement = (
+                update(User)
+                .where(User.user_id == user_id)
+                .values(diary_id=diary_id, diary_link=True)
+            )
+            await session.exec(statement)  # type: ignore
+            await session.commit()

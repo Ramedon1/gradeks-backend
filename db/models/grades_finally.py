@@ -1,6 +1,5 @@
 from pydantic import UUID4
 from sqlalchemy import UUID
-from sqlalchemy.testing.suite.test_reflection import users
 from sqlmodel import Field, SQLModel
 
 
@@ -17,7 +16,7 @@ class GradesFinally(SQLModel, table=True):
 
     __tablename__ = "grades_finally"
 
-    user_id: UUID4 = Field(foreign_key=users.user_id, primary_key=True)
+    user_id: UUID4 = Field(foreign_key="users.user_id", primary_key=True)
     quarter: str = Field(default=None, nullable=True)
     subject: str = Field(default=None, nullable=True)
     grade: int = Field(default=None, nullable=True)

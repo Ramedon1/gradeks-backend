@@ -1,26 +1,22 @@
-import asyncio
-from datetime import datetime
-
 from db.manager import db_manager
-from web.models.users.user import (DiaryInfo, DistributionInfo, GradesInfo,
-                                   ReferralInfo)
+from web.models.users.user import NewGrade, ReferralInfo, SpecDiaryInfo
 
 
-async def get_distribution(user_id: str) -> DistributionInfo:
-    user_stats = await db_manager.distribution.get_distributions_user(user_id)
-    return DistributionInfo.model_validate(user_stats, from_attributes=True)
+async def get_distribution(user_id: str) -> bool:
+    user_distribution = await db_manager.distribution.get_distribution_status_user(
+        user_id
+    )
+    return user_distribution
 
 
-async def get_diary_info(user_id: str) -> DiaryInfo:
-    diary_info = await db_manager.users.get_diary_info(user_id)
-    return DiaryInfo.model_validate(diary_info, from_attributes=True)
+async def get_new_grades(user_id: str) -> list[NewGrade]:
+    new_grades = await db_manager.new_grades.get_new_grades_by_user(user_id)
+    return [NewGrade.model_validate(item, from_attributes=True) for item in new_grades]
 
 
-async def get_grades_by_period(
-    user_id: str, start_date: datetime, end_date: datetime
-) -> list[GradesInfo]:
-    grades = await db_manager.grades.get_grades_by_period(user_id, start_date, end_date)
-    return [GradesInfo.model_validate(grade, from_attributes=True) for grade in grades]
+async def get_spec_diary_info(user_id: str) -> SpecDiaryInfo:
+    spec_diary_info = await db_manager.users.get_spec_diary_info(user_id)
+    return SpecDiaryInfo.model_validate(spec_diary_info, from_attributes=True)
 
 
 async def get_referrals(user_id: str) -> list[ReferralInfo]:
