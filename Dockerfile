@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "run_web.py"]
+CMD ["python", "run.py"]
