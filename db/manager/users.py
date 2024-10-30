@@ -115,3 +115,16 @@ class DbManagerUsers(DbManagerBase):
             )
             await session.exec(statement)  # type: ignore
             await session.commit()
+
+
+    async def get_telegram_id_by_user_id(
+        self, user_id: str | UUID, outer_session: AsyncSession | None = None
+    ) -> int:
+        async with self.session_manager(outer_session) as session:
+            telegram_id = (
+                await session.exec(
+                    select(User.telegram_id).where(User.user_id == user_id)
+                )
+            ).one_or_none()
+
+            return telegram_id

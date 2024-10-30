@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 
 from db.manager import db_manager
 from rediska import redis_manager
+from tg.bot import bot
 from web.depends.access_token import current_user_id
 from web.exceptions.users import DiaryIdDException
 from web.methods.create_user import create_users
@@ -59,6 +60,12 @@ async def link_diary(
 
     diary_id = match.group(1)
     await db_manager.users.connect_diary(user_id, diary_id)
+
+    telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
+    await bot.send_message(
+        telegram_id,
+        f"🎉 Дневник успешно привязан!",
+    )
 
     return SpecDiaryInfo(diary_id=diary_id, diary_link=True)
 
