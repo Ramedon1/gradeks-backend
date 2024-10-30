@@ -4,6 +4,7 @@ import uuid
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 import settings
 from common import context_logger
@@ -36,6 +37,12 @@ async def add_process_time_header_and_trace_id(request: Request, call_next):
 fastapi_app.include_router(user_router)
 fastapi_app.include_router(distribution_router)
 fastapi_app.include_router(grade_router)
+
+
+
+@fastapi_app.options("/{path:path}")
+async def preflight_handler():
+    return JSONResponse(status_code=200, content="OK")
 
 
 origins = [
