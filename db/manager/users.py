@@ -128,3 +128,13 @@ class DbManagerUsers(DbManagerBase):
             ).one_or_none()
 
             return telegram_id
+
+    async def get_users_diary_connected(
+        self, outer_session: AsyncSession | None = None
+    ) -> list[User]:
+        async with self.session_manager(outer_session) as session:
+            statement = select(User).where(User.diary_link == True)
+            result = await session.exec(statement)
+            users = result.all()
+
+            return users
