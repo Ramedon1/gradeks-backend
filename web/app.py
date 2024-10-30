@@ -38,14 +38,7 @@ fastapi_app.include_router(distribution_router)
 fastapi_app.include_router(grade_router)
 
 
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "http://localhost:3000",
-    'https://gradeks.xyz',
-    settings.WEB_UI_URL.strip("/"),
-    "*",
-]
+origins = ["*"]
 
 fastapi_app.add_middleware(
     CORSMiddleware,
