@@ -1,4 +1,5 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           WebAppInfo)
 
 import settings
 
@@ -11,8 +12,19 @@ def get_play_now_keyboard(ref: int | str | None = None):
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="Play Now", web_app=WebAppInfo(url=url)),
+                InlineKeyboardButton(text="🎇 Поехали", web_app=WebAppInfo(url=url)),
             ],
+            [
+                InlineKeyboardButton(
+                    text="Сообщество Gradeks", url="https://t.me/gradeks"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🎓 Как привязать", url="https://t.me/gradeks/3"
+                )
+            ],
+            # TODO Сделать туториал по привязке дневника
         ]
     )
     return keyboard

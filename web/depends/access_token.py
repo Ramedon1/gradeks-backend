@@ -4,10 +4,8 @@ from fastapi.params import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from rediska import redis_manager
-from web.exceptions.unauthorized import (
-    AccessTokenNotFoundException,
-    NoAccessTokenException,
-)
+from web.exceptions.unauthorized import (AccessTokenNotFoundException,
+                                         NoAccessTokenException)
 
 
 async def current_user_id(
