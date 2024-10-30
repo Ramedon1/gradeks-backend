@@ -11,6 +11,7 @@ class ChatTypeEnum(StrEnum):
     group: str = "group"
     supergroup: str = "supergroup"
     channel: str = "channel"
+    sender: str = "sender"
 
 
 class WebAppUser(BaseModel):
