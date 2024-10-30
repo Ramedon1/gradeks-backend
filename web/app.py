@@ -43,7 +43,6 @@ origins = [
     "http://localhost:8000",
     "http://localhost:3000",
     'https://gradeks.xyz',
-    'https://api.gradeks.xyz',
     settings.WEB_UI_URL.strip("/"),
     "*",
 ]
