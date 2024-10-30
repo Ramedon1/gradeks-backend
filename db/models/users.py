@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 
 from pydantic import UUID4
-from sqlalchemy import UUID
+from sqlalchemy import UUID, Column
 from sqlmodel import Field, SQLModel
 
 from common.common import CreatedAtField
-
+from sqlalchemy import BigInteger
 
 class User(SQLModel, table=True):
     """
@@ -31,7 +31,7 @@ class User(SQLModel, table=True):
     user_id: UUID4 = Field(default_factory=uuid.uuid4, primary_key=True)
 
     # Telegram Profile
-    telegram_id: int = Field(nullable=False)
+    telegram_id: int = Field(sa_column=Column(BigInteger, nullable=False))
     first_name: str | None = Field(nullable=True, default=None, max_length=255)
     last_name: str | None = Field(nullable=True, default=None, max_length=255)
     username: str | None = Field(nullable=True, default=None, max_length=255)
