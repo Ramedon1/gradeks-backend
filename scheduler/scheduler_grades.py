@@ -36,4 +36,3 @@ async def main():
     while True:
         await update_grades_task()
         await asyncio.sleep(30)
-

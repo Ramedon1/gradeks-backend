@@ -20,3 +20,5 @@ REDIS_PASS = os.getenv("REDIS_PASS", "")
 REDIS_DB = int(os.getenv("REDIS_DB", "0"))
 
 WEB_UI_URL = os.getenv("WEB_UI_URL", "")
+
+PROXY_URL = os.getenv("PROXY_URL", "")

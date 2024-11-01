@@ -28,7 +28,6 @@ class DbManagerUsers(DbManagerBase):
                 last_name=last_name,
                 username=username,
                 telegram_hash=telegram_hash,
-                is_active=True,
             )
             session.add(new_user)
             await session.commit()
