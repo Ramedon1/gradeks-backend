@@ -26,22 +26,22 @@ async def main() -> None:
             Quarters(
                 quarter_name="Первая четверть",
                 quarter_date_start=date(2024, 9, 1),
-                quarter_date_end=date(2024, 11, 30),
+                quarter_date_end=date(2024, 10, 25),
             ),
             Quarters(
                 quarter_name="Вторая четверть",
-                quarter_date_start=date(2024, 12, 1),
-                quarter_date_end=date(2025, 2, 28),
+                quarter_date_start=date(2024, 11, 4),
+                quarter_date_end=date(2024, 12, 29),
             ),
             Quarters(
                 quarter_name="Третья четверть",
-                quarter_date_start=date(2025, 3, 1),
-                quarter_date_end=date(2025, 5, 31),
+                quarter_date_start=date(2025, 1, 9),
+                quarter_date_end=date(2025, 3, 25),
             ),
             Quarters(
                 quarter_name="Четвертая четверть",
-                quarter_date_start=date(2025, 6, 1),
-                quarter_date_end=date(2025, 8, 31),
+                quarter_date_start=date(2025, 4, 4),
+                quarter_date_end=date(2025, 5, 29),
             ),
         ]
 
