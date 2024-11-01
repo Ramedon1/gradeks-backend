@@ -5,8 +5,8 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
-from db.models.users import User
 from db.models.distribution import Distribution
+from db.models.users import User
 from web.models.users.user import SpecDiaryInfo
 
 
@@ -139,7 +139,9 @@ class DbManagerUsers(DbManagerBase):
 
             return users
 
-    async def user_scheduler_grades(self, outer_session: AsyncSession | None = None) -> list[User]:
+    async def user_scheduler_grades(
+        self, outer_session: AsyncSession | None = None
+    ) -> list[User]:
         async with self.session_manager(outer_session) as session:
             statement = (
                 select(User)
@@ -147,7 +149,7 @@ class DbManagerUsers(DbManagerBase):
                 .where(
                     User.diary_link == True,
                     User.is_active == True,
-                    Distribution.distribution_status == True
+                    Distribution.distribution_status == True,
                 )
             )
             result = await session.exec(statement)

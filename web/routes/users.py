@@ -5,10 +5,10 @@ from typing import Annotated
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import FileResponse
-from scheduler.methods.grades import add_grades
 
 from db.manager import db_manager
 from rediska import redis_manager
+from scheduler.methods.grades import add_grades
 from tg.bot import bot
 from web.depends.access_token import current_user_id
 from web.exceptions.users import DiaryIdDException

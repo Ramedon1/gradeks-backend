@@ -6,7 +6,6 @@ from scheduler.methods.grades import update_grades
 from scheduler.methods.web import get_grades_by_period
 
 
-
 async def process_user_grades(user):
     quarters = await db_manager.quarters.get_quarters()
     start_date, end_date = await get_current_period(quarters)

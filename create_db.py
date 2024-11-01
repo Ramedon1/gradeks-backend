@@ -66,7 +66,6 @@ async def main() -> None:
         await session.commit()  # Commit user here
         await session.refresh(user)  # Refresh to ensure the user ID is available
 
-
         # Create and add grades
         for _ in range(1, 10):
             grade = Grades(
@@ -91,7 +90,6 @@ async def main() -> None:
         await session.commit()  # Commit all grades at once
 
     await db_manager.close()  # Ensure db_manager is closed properly
-
 
 
 asyncio.run(main())

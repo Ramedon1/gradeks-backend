@@ -1,16 +1,15 @@
 import logging
 from collections import defaultdict
+from datetime import datetime
 
 from db.manager import db_manager
 from db.models.grades import Grades
 from scheduler.methods.common import get_current_period
 from scheduler.methods.web import get_grades_by_period
 from tg.bot import bot
-from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 
 async def update_grades(user_id, new_grades):
@@ -42,9 +41,12 @@ async def update_grades(user_id, new_grades):
                         new_grade=grade_entry.grade,
                         grade_weight=grade_entry.weight,
                     )
-                    await bot.send_message(user_id=telegram_id, text=f'🔃 Обновили оценку на {existing_grade.grading_date.strftime("%d.%m.%Y")}. \n'
-                                           f'📚 Предмет: {existing_grade.subject} \n'
-                                           f'Была оценка: {existing_grade.grade} | Стала оценка: {grade_entry.grade}')
+                    await bot.send_message(
+                        user_id=telegram_id,
+                        text=f'🔃 Обновили оценку на {existing_grade.grading_date.strftime("%d.%m.%Y")}. \n'
+                        f"📚 Предмет: {existing_grade.subject} \n"
+                        f"Была оценка: {existing_grade.grade} | Стала оценка: {grade_entry.grade}",
+                    )
             else:
                 logger.info(f"Adding new grade for {grade_key}")
                 new_db_grade = Grades(
@@ -56,9 +58,12 @@ async def update_grades(user_id, new_grades):
                 )
                 await db_manager.grades.add_grade(new_db_grade)
 
-                await bot.send_message(user_id=telegram_id, text=f'🗓 Новая оценка. \n'
-                                       f'📚 Предмет: {new_db_grade.subject} \n'
-                                       f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}')
+                await bot.send_message(
+                    user_id=telegram_id,
+                    text=f"🗓 Новая оценка. \n"
+                    f"📚 Предмет: {new_db_grade.subject} \n"
+                    f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
+                )
 
     for existing_grade in existing_grades:
         grade_key = (existing_grade.subject, existing_grade.grading_date)
@@ -85,7 +90,7 @@ async def add_grades(user_id):
 
         for new_grade in new_grades:
             for grade_entry in new_grade.grades:
-                grading_date = datetime.strptime(grade_entry.date, '%d.%m.%Y').date()
+                grading_date = datetime.strptime(grade_entry.date, "%d.%m.%Y").date()
                 grade_key = (new_grade.subject, grading_date)
 
                 if grade_key in existing_grades_map:
@@ -104,4 +109,4 @@ async def add_grades(user_id):
 
         logger.info(f"Grades added successfully for user_id: {user_id}")
     except Exception as e:
-        logger.error('Error while adding grades')
+        logger.error("Error while adding grades")
