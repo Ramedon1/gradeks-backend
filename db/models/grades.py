@@ -17,7 +17,6 @@ class Grades(SQLModel, table=True):
         subject (str): название предмета, по которому стоит оценка
         grade (int): оценка
         grade_weight (int): вес оценки, используется для расчета средней оценки
-        long_name (str | None): полное название оценки
     """
 
     __tablename__ = "grades"
@@ -28,4 +27,3 @@ class Grades(SQLModel, table=True):
     subject: str = Field(default=None, nullable=True)
     grade: int = Field(default=None, nullable=True)
     grade_weight: int = Field(default=None, nullable=True)
-    long_name: str | None = Field(default=None, nullable=True)

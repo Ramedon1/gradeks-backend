@@ -1,5 +1,6 @@
 import asyncio
 from datetime import date, timedelta
+from importlib.metadata import distribution
 from random import randint
 from uuid import uuid4  # Correctly importing uuid4 from the uuid module
 
@@ -20,6 +21,7 @@ async def main() -> None:
         await conn.run_sync(SQLModel.metadata.create_all)
 
     async with db_manager.session() as session:
+        # Create and add quarters
         quarters = [
             Quarters(
                 quarter_name="Первая четверть",
@@ -43,9 +45,7 @@ async def main() -> None:
             ),
         ]
 
-        for quarter in quarters:
-            session.add(quarter)
-
+        session.add_all(quarters)  # Use add_all to add multiple items
         await session.commit()
 
         for quarter in quarters:
@@ -57,38 +57,41 @@ async def main() -> None:
             first_name="ASdd",
             last_name="dasd",
             username="asd",
+            diary_link=True,
+            diary_id="3863E2BB1436B44C04C5EC565CE59A19",
             telegram_hash="asd",
             is_active=True,
         )
         session.add(user)
-
-        # Commit the user before inserting grades
-        await session.commit()
+        await session.commit()  # Commit user here
         await session.refresh(user)  # Refresh to ensure the user ID is available
 
+
+        # Create and add grades
         for _ in range(1, 10):
             grade = Grades(
                 user_id=user.user_id,
                 subject="Math",
-                grade=randint(2, 5),  # Random grade between 1 and 5
-                grade_weight=randint(1, 6),  # Random weight between 1 and 6
-                grading_date=date(2024, 9, 1)
-                + timedelta(days=randint(0, 120)),  # More variability in dates
+                grade=randint(2, 5),
+                grade_weight=randint(1, 6),
+                grading_date=date(2024, 9, 1) + timedelta(days=randint(0, 120)),
             )
             session.add(grade)
-            grade = NewGrades(
+
+            new_grade = NewGrades(
                 grade_id=grade.grade_id,
                 user_id=user.user_id,
                 subject="Math",
-                grade=randint(2, 5),  # Random grade between 1 and 5
-                grade_weight=randint(1, 6),  # Random weight between 1 and 6
-                grading_date=date(2024, 9, 1)
-                + timedelta(days=randint(0, 120)),  # More variability in dates
+                grade=randint(2, 5),
+                grade_weight=randint(1, 6),
+                grading_date=date(2024, 9, 1) + timedelta(days=randint(0, 120)),
             )
-            session.add(grade)
-        await session.commit()
+            session.add(new_grade)
 
-    await db_manager.close()
+        await session.commit()  # Commit all grades at once
+
+    await db_manager.close()  # Ensure db_manager is closed properly
+
 
 
 asyncio.run(main())

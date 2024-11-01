@@ -17,7 +17,6 @@ class NewGrades(SQLModel, table=True):
         grade (int): оценка
         grade_old (int | None): старая оценка
         grade_weight (int): вес оценки, используется для расчета средней оценки
-        long_name (str | None): полное название оценки
     """
 
     __tablename__ = "new_grades"
@@ -29,4 +28,3 @@ class NewGrades(SQLModel, table=True):
     grade: int = Field(default=None, nullable=True)
     grade_old: int = Field(default=None, nullable=True)
     grade_weight: int = Field(default=None, nullable=True)
-    long_name: str | None = Field(default=None, nullable=True)

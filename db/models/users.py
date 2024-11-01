@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 
 from pydantic import UUID4
-from sqlalchemy import UUID, Column
+from sqlalchemy import UUID, BigInteger, Column
 from sqlmodel import Field, SQLModel
 
 from common.common import CreatedAtField
-from sqlalchemy import BigInteger
+
 
 class User(SQLModel, table=True):
     """
@@ -38,7 +38,7 @@ class User(SQLModel, table=True):
     created_at: datetime = CreatedAtField(index=True)
     diary_id: str | None = Field(default=None, nullable=True)
     diary_link: bool = Field(default=False, nullable=False)
-    is_active: bool = Field(nullable=False, default=True)
+    is_active: bool = Field(nullable=False, default=False)
     grade_type: str = Field(default="new", nullable=False)
     # Telegram Auth
     telegram_hash: str = Field(nullable=False, default=None, max_length=255)

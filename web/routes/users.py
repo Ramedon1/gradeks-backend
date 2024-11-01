@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import FileResponse
+from scheduler.methods.grades import add_grades
 
 from db.manager import db_manager
 from rediska import redis_manager
@@ -59,13 +60,15 @@ async def link_diary(
         raise DiaryIdDException
 
     diary_id = match.group(1)
-    await db_manager.users.connect_diary(user_id, diary_id)
+
+    await add_grades(user_id)
 
     telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
     await bot.send_message(
         telegram_id,
-        f"🎉 Дневник успешно привязан!",
+        f"🎉 Дневник успешно привязан, оценки доступны в приложении!",
     )
+    await db_manager.users.connect_diary(user_id, diary_id)
 
     return SpecDiaryInfo(diary_id=diary_id, diary_link=True)
 

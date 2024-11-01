@@ -6,6 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
 from db.models.users import User
+from db.models.distribution import Distribution
 from web.models.users.user import SpecDiaryInfo
 
 
@@ -116,7 +117,6 @@ class DbManagerUsers(DbManagerBase):
             await session.exec(statement)  # type: ignore
             await session.commit()
 
-
     async def get_telegram_id_by_user_id(
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> int:
@@ -134,6 +134,22 @@ class DbManagerUsers(DbManagerBase):
     ) -> list[User]:
         async with self.session_manager(outer_session) as session:
             statement = select(User).where(User.diary_link == True)
+            result = await session.exec(statement)
+            users = result.all()
+
+            return users
+
+    async def user_scheduler_grades(self, outer_session: AsyncSession | None = None) -> list[User]:
+        async with self.session_manager(outer_session) as session:
+            statement = (
+                select(User)
+                .join(Distribution, User.user_id == Distribution.user_id)
+                .where(
+                    User.diary_link == True,
+                    User.is_active == True,
+                    Distribution.distribution_status == True
+                )
+            )
             result = await session.exec(statement)
             users = result.all()
 
