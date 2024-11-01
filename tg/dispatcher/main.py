@@ -24,7 +24,8 @@ async def start(message: Message, command: CommandObject):
         file_info = await bot.get_file(file_id)
 
         avatars_dir = "avatars"
-        os.makedirs(avatars_dir, exist_ok=True)
+        if not os.path.exists(avatars_dir):
+            os.makedirs(avatars_dir)
 
         file_path = f"{avatars_dir}/{message.from_user.id}_avatar.jpg"
 

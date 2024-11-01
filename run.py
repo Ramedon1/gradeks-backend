@@ -14,7 +14,6 @@ async def start_bot():
 async def start_scheduler():
     from scheduler.scheduler_grades import main
 
-    # Directly await the main function of the scheduler
     await main()
 
 async def start_server():
@@ -25,6 +24,5 @@ async def start_server():
 async def main() -> None:
     await asyncio.gather(start_bot(), start_server(), start_scheduler())
 
-# Use asyncio.run to run the main coroutine
 if __name__ == "__main__":
     asyncio.run(main())
