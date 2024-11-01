@@ -33,7 +33,7 @@ async def start_server():
 
 
 async def main() -> None:
-    await asyncio.gather(start_bot(), start_server(), start_scheduler())
+    await asyncio.gather(start_bot(), start_server())
 
 
 asyncio.run(main())
