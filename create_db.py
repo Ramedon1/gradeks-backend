@@ -50,21 +50,6 @@ async def main() -> None:
         for quarter in quarters:
             await session.refresh(quarter)
 
-        # Insert the user and commit
-        user = User(
-            telegram_id=123123123,
-            first_name="ASdd",
-            last_name="dasd",
-            username="asd",
-            diary_link=True,
-            diary_id="3863E2BB1436B44C04C5EC565CE59A19",
-            telegram_hash="asd",
-            is_active=True,
-        )
-        session.add(user)
-        await session.commit()  # Commit user here
-        await session.refresh(user)  # Refresh to ensure the user ID is available
-
     await db_manager.close()  # Ensure db_manager is closed properly
 
 

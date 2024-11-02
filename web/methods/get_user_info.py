@@ -16,6 +16,8 @@ async def get_new_grades(user_id: str) -> list[NewGrade]:
     raw_grades = await redis_manager.new_grades.get_all_new_grades(user_id)
 
     validated_grades = []
+    if not raw_grades:
+        return []
     for entry in raw_grades:
         try:
             validated_grade = NewGrade(
