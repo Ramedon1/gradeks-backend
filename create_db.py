@@ -9,7 +9,6 @@ from sqlmodel import SQLModel
 
 from db.manager import db_manager
 from db.models.grades import Grades
-from db.models.new_grades import NewGrades
 from db.models.quarters import Quarters
 from db.models.users import User
 from db.session import engine
@@ -65,29 +64,6 @@ async def main() -> None:
         session.add(user)
         await session.commit()  # Commit user here
         await session.refresh(user)  # Refresh to ensure the user ID is available
-
-        # Create and add grades
-        for _ in range(1, 10):
-            grade = Grades(
-                user_id=user.user_id,
-                subject="Math",
-                grade=randint(2, 5),
-                grade_weight=randint(1, 6),
-                grading_date=date(2024, 9, 1) + timedelta(days=randint(0, 120)),
-            )
-            session.add(grade)
-
-            new_grade = NewGrades(
-                grade_id=grade.grade_id,
-                user_id=user.user_id,
-                subject="Math",
-                grade=randint(2, 5),
-                grade_weight=randint(1, 6),
-                grading_date=date(2024, 9, 1) + timedelta(days=randint(0, 120)),
-            )
-            session.add(new_grade)
-
-        await session.commit()  # Commit all grades at once
 
     await db_manager.close()  # Ensure db_manager is closed properly
 

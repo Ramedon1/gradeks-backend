@@ -45,6 +45,11 @@ class SpecDiaryInfo(BaseModel):
     diary_link: bool | None
 
 
+class LinkDiary(BaseModel):
+    spec_diary: SpecDiaryInfo | None
+    diary_info: list[DiaryInfo] | None
+
+
 class DiaryConnect(BaseModel):
     diary_id: str
 

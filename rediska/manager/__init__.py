@@ -1,6 +1,7 @@
 from redis.asyncio import Redis
 
 from rediska.manager.access_tokens import RedisManagerAccessTokens
+from rediska.manager.new_grades import RedisManagerNewGrades
 
 
 class RedisManager:
@@ -10,6 +11,7 @@ class RedisManager:
         self.access_tokens: RedisManagerAccessTokens = RedisManagerAccessTokens(
             connection
         )
+        self.new_grades: RedisManagerNewGrades = RedisManagerNewGrades(connection)
 
     async def start(self) -> None:
         if self._is_stopped is False:

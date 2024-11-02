@@ -1,4 +1,7 @@
+from pydantic import ValidationError
+
 from db.manager import db_manager
+from rediska import redis_manager
 from web.models.users.user import NewGrade, ReferralInfo, SpecDiaryInfo
 
 
@@ -10,8 +13,25 @@ async def get_distribution(user_id: str) -> bool:
 
 
 async def get_new_grades(user_id: str) -> list[NewGrade]:
-    new_grades = await db_manager.new_grades.get_new_grades_by_user(user_id)
-    return [NewGrade.model_validate(item, from_attributes=True) for item in new_grades]
+    raw_grades = await redis_manager.new_grades.get_all_new_grades(user_id)
+
+    validated_grades = []
+    for entry in raw_grades:
+        try:
+            validated_grade = NewGrade(
+                grade=int(entry.get("new_grade")),
+                old_grade=(
+                    int(entry.get("old_grade")) if entry.get("old_grade") else None
+                ),
+                date=entry.get("grading_date"),
+                subject=entry.get("subject"),
+                coff=int(entry.get("grade_weight")),
+            )
+            validated_grades.append(validated_grade)
+        except ValidationError as e:
+            print(f"Validation failed for entry: {entry} - {e}")
+
+    return validated_grades
 
 
 async def get_spec_diary_info(user_id: str) -> SpecDiaryInfo:

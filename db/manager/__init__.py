@@ -7,7 +7,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from db.manager.base import DbManagerBase
 from db.manager.distribution import DbManagerDistribution
 from db.manager.grades import DbManagerGrades
-from db.manager.new_grades import DbManagerNewGrades
 from db.manager.quarters import DbManagerQuarters
 from db.manager.referral import DbManagerReferrals
 from db.manager.users import DbManagerUsers
@@ -25,7 +24,6 @@ class DbManager:
         self.base: DbManagerBase = DbManagerBase(db_engine, self)
         self.referral: DbManagerReferrals = DbManagerReferrals(db_engine, self)
         self.quarters: DbManagerQuarters = DbManagerQuarters(db_engine, self)
-        self.new_grades: DbManagerNewGrades = DbManagerNewGrades(db_engine, self)
 
     def session(self) -> AsyncSession:
         return self._async_session()

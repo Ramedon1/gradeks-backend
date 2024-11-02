@@ -4,9 +4,11 @@ from datetime import datetime
 
 from db.manager import db_manager
 from db.models.grades import Grades
-from scheduler.methods.common import get_current_period
+from rediska import redis_manager
+from scheduler.methods.common import get_full_year
 from scheduler.methods.web import get_grades_by_period
 from tg.bot import bot
+from tg.common.web_app_keyboard import go_web_app
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,7 +25,8 @@ async def update_grades(user_id, new_grades):
 
     for new_grade in new_grades:
         for grade_entry in new_grade.grades:
-            grading_date = datetime.strptime(grade_entry.date, "%d.%m.%Y").date()
+            grading_date = datetime.strptime(grade_entry.date, "%Y-%m-%d").date()
+
             grade_key = (new_grade.subject, grading_date)
             processed_keys.add(grade_key)
             new_grades_count[new_grade.subject] += 1
@@ -41,11 +44,21 @@ async def update_grades(user_id, new_grades):
                         new_grade=grade_entry.grade,
                         grade_weight=grade_entry.weight,
                     )
+                    await redis_manager.new_grades.update_grade_in_redis(
+                        user_id=user_id,
+                        subject=new_grade.subject,
+                        grading_date=grading_date.strftime("%d-%m"),
+                        new_grade=grade_entry.grade,
+                        old_grade=existing_grade.grade,
+                        grade_weight=grade_entry.weight,
+                    )
+
                     await bot.send_message(
-                        user_id=telegram_id,
+                        chat_id=telegram_id,
                         text=f'🔃 Обновили оценку на {existing_grade.grading_date.strftime("%d.%m.%Y")}. \n'
                         f"📚 Предмет: {existing_grade.subject} \n"
                         f"Была оценка: {existing_grade.grade} | Стала оценка: {grade_entry.grade}",
+                        reply_markup=go_web_app(),
                     )
             else:
                 logger.info(f"Adding new grade for {grade_key}")
@@ -58,11 +71,20 @@ async def update_grades(user_id, new_grades):
                 )
                 await db_manager.grades.add_grade(new_db_grade)
 
+                await redis_manager.new_grades.add_new_grade_to_redis(
+                    user_id=user_id,
+                    subject=new_grade.subject,
+                    grading_date=grading_date.strftime("%d-%m"),
+                    grade=grade_entry.grade,
+                    grade_weight=grade_entry.weight,
+                )
+
                 await bot.send_message(
-                    user_id=telegram_id,
+                    chat_id=telegram_id,
                     text=f"🗓 Новая оценка. \n"
                     f"📚 Предмет: {new_db_grade.subject} \n"
                     f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
+                    reply_markup=go_web_app(),
                 )
 
     for existing_grade in existing_grades:
@@ -77,27 +99,30 @@ async def update_grades(user_id, new_grades):
     logger.info(f"Grades updated successfully for user_id: {user_id}")
 
 
-async def add_grades(user_id):
+async def add_grades(user_id, diary_id):
     quarters = await db_manager.quarters.get_quarters()
-    start_date, end_date = await get_current_period(quarters)
-    try:
-        new_grades = await get_grades_by_period(user_id, start_date, end_date)
+    start_date, end_date = await get_full_year(quarters)
 
-        logger.info(f"First adding grades for user_id: {user_id}")
+    if (start_date, end_date) is None:
+        logger.error("Failed to get current period")
+        raise "Failed to get current period"
 
+    new_grades = await get_grades_by_period(diary_id, start_date, end_date)
+    logger.info(f"First adding grades for user_id: {user_id}")
+
+    if len(new_grades) > 0:
         existing_grades = await db_manager.grades.get_grades_by_user(user_id)
         existing_grades_map = {(g.subject, g.grading_date): g for g in existing_grades}
 
         for new_grade in new_grades:
             for grade_entry in new_grade.grades:
-                grading_date = datetime.strptime(grade_entry.date, "%d.%m.%Y").date()
+                grading_date = datetime.strptime(grade_entry.date, "%Y-%m-%d").date()
                 grade_key = (new_grade.subject, grading_date)
 
                 if grade_key in existing_grades_map:
                     logger.info(f"Grade for {grade_key} already exists. Skipping.")
                     continue
 
-                logger.info(f"Adding new grade for {grade_key}")
                 new_db_grade = Grades(
                     user_id=user_id,
                     subject=new_grade.subject,
@@ -105,8 +130,10 @@ async def add_grades(user_id):
                     grade=grade_entry.grade,
                     grade_weight=grade_entry.weight,
                 )
+
                 await db_manager.grades.add_grade(new_db_grade)
 
         logger.info(f"Grades added successfully for user_id: {user_id}")
-    except Exception as e:
-        logger.error("Error while adding grades")
+    else:
+        logger.error("Failed to get grades from web")
+        raise "Failed to get grades from web"

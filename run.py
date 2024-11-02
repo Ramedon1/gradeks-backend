@@ -2,8 +2,12 @@ import asyncio
 
 import uvicorn
 
+import settings
+from tg.bot import bot
 from tg.dispatcher import dp
 from web.app import fastapi_app
+
+admin_id = int(settings.ADMIN_ID)
 
 
 async def start_bot():
@@ -27,8 +31,29 @@ async def start_server():
     await server.serve()
 
 
-async def main() -> None:
-    await asyncio.gather(start_bot(), start_server(), start_scheduler())
+async def start_tasks():
+    tasks = [
+        asyncio.create_task(start_bot(), name="Bot"),
+        asyncio.create_task(start_server(), name="Server"),
+        asyncio.create_task(start_scheduler(), name="Scheduler"),
+    ]
+
+    for task in tasks:
+        task.add_done_callback(lambda t: asyncio.create_task(log_task_exception(t)))
+
+    await asyncio.gather(*tasks, return_exceptions=True)
+
+
+async def log_task_exception(task: asyncio.Task):
+    if task.exception():
+        await bot.send_message(
+            chat_id=admin_id,
+            text=f"Task {task.get_name()} failed with exception: {task.exception()}",
+        )
+
+
+async def main():
+    await start_tasks()
 
 
 if __name__ == "__main__":

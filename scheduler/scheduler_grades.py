@@ -13,13 +13,14 @@ async def process_user_grades(user):
     if not start_date or not end_date:
         return
 
-    new_grades = await get_grades_by_period(user.diary_id, start_date, end_date)
+    new_grades = await get_grades_by_period(user.user_id, start_date, end_date)
+
     if new_grades:
         try:
             await update_grades(user.user_id, new_grades)
         except asyncio.CancelledError:
             pass
-        except Exception:
+        except Exception as e:
             pass
 
 

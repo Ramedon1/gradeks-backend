@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import date, datetime, timedelta
 
@@ -25,7 +26,11 @@ async def get_grades_by_period(
 
     headers = {
         "Content-Type": "application/json; charset=utf-8",
+        "Host": "mp.edu.orb.ru",
+        "Connection": "Keep-Alive",
         "User-Agent": UserAgent().random,
+        "Accept-Encoding": "gzip, deflate, br",
+        "Content-Length": str(len(json.dumps(data))),
     }
 
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -38,7 +43,6 @@ async def get_grades_by_period(
                 result = await response.json()
                 if "data" in result:
                     grades_by_subject = []
-                    occupied_dates = set()
 
                     for item in result["data"]:
                         subject = item["SUBJECT_NAME"]
@@ -49,25 +53,24 @@ async def get_grades_by_period(
                                 mark["DATE"], "%d.%m.%Y"
                             ).date()
 
-                            while grade_date in occupied_dates:
-                                grade_date += timedelta(days=1)
-
-                            grade_date_str = grade_date.strftime("%d.%m.%Y")
-
-                            grades.append(
-                                Grade(
-                                    date=grade_date_str,
-                                    grade=mark["VALUE"],
-                                    weight=mark["WEIGHT"],
-                                )
+                            grade = Grade(
+                                date=grade_date.isoformat(),
+                                grade=mark["VALUE"],
+                                weight=mark["WEIGHT"],
                             )
 
-                            occupied_dates.add(grade_date)
+                            while any(
+                                g.date == grade.date and g.weight == grade.weight
+                                for g in grades
+                            ):
+                                grade_date += timedelta(days=1)
+                                grade.date = grade_date.isoformat()
+
+                            grades.append(grade)
 
                         grades_by_subject.append(
                             NewGrade(subject=subject, grades=grades)
                         )
-
                     return grades_by_subject
             else:
                 logger.error(f"Unexpected response status: {response.status}")

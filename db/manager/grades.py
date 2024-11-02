@@ -94,32 +94,6 @@ class DbManagerGrades(DbManagerBase):
 
             return grade if grade else None
 
-    async def update_grade(
-        self,
-        grade_id: str | UUID,
-        grade: Grades,
-        outer_session: AsyncSession | None = None,
-    ):
-        async with self.session_manager(outer_session) as session:
-            try:
-                statement = (
-                    update(Grades)
-                    .where(Grades.grade_id == grade_id)
-                    .values(
-                        user_id=grade.user_id,
-                        subject=grade.subject,
-                        grading_date=grade.grading_date,
-                        grade=grade.grade,
-                        grade_weight=grade.grade_weight,
-                    )
-                )
-                await session.exec(statement)
-                await session.commit()
-
-            except Exception as e:
-                print(e)
-                await session.rollback()
-
     async def get_grade_by_subject(
         self,
         user_id: str | UUID,
@@ -150,3 +124,16 @@ class DbManagerGrades(DbManagerBase):
                 await session.commit()
             else:
                 await session.rollback()
+
+    async def delete_grades_by_user(
+        self, user_id: str | UUID, outer_session: AsyncSession | None = None
+    ):
+        async with self.session_manager(outer_session) as session:
+            statement = select(Grades).where(Grades.user_id == user_id)
+            result = await session.exec(statement)
+            grades = result.all()
+
+            for grade in grades:
+                await session.delete(grade)
+
+            await session.commit()
