@@ -8,6 +8,7 @@ from aiogram.types import Message
 
 from tg.bot import bot
 from tg.common.play_now_keyboard import get_play_now_keyboard
+from aiogram.types import FSInputFile
 
 main_router = Router()
 
@@ -42,8 +43,12 @@ async def start(message: Message, command: CommandObject):
         if re.match(r"r_[0-9]+", command.args):
             keyboard = get_play_now_keyboard(ref=command.args.replace("r_", ""))
 
-    await message.answer(
-        text=(
+    animation = FSInputFile("static/gradeks.mp4", filename="gradeks.mp4")
+
+    await bot.send_animation(
+        animation=animation,
+        chat_id=message.from_user.id,
+        caption=(
             "Привет, друг! Это Gradeks 👋\n\n"
             "Подключай электронный дневник и следи за оценками.\n\n"
             "Внизу есть небольшая инструкция. Вероятно, это всё, что надо знать."

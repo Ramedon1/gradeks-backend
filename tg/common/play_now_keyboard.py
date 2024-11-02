@@ -21,10 +21,9 @@ def get_play_now_keyboard(ref: int | str | None = None):
             ],
             [
                 InlineKeyboardButton(
-                    text="🎓 Как привязать", url="https://t.me/gradeks/3"
+                    text="🎓 Как привязать дневник", url="https://telegra.ph/Instrukciya-po-privyazke-ehlektronnogo-dnevnika-deeduorbru-k-Gradeks-11-02"
                 )
             ],
-            # TODO Сделать туториал по привязке дневника
         ]
     )
     return keyboard
