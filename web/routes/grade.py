@@ -30,7 +30,6 @@ async def get_grades(
 ) -> list[DiaryInfo]:
     if request.filter not in PeriodsEnum.__members__:
         raise GradeFilterTypeException
-    print(request.filter)
     return await get_diary_info(user_id, request.filter)
 
 
