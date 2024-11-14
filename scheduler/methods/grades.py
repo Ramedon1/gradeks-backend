@@ -36,7 +36,7 @@ async def update_grades(user_id, new_grades):
 
                 if (
                     existing_grade.grade != grade_entry.grade
-                    or existing_grade.grade_weight != grade_entry.weight
+                    and existing_grade.grade_weight != grade_entry.weight
                 ):
                     logger.info(f"Updating grade for {grade_key}")
                     await db_manager.grades.change_grade(
