@@ -120,7 +120,7 @@ class DbManagerGrades(DbManagerBase):
             grade = result.first()
 
             if grade:
-                await session.delete(grade)
+                session.delete(grade)
                 await session.commit()
             else:
                 await session.rollback()
