@@ -40,8 +40,8 @@ class DbManagerGrades(DbManagerBase):
     async def get_grades_by_quarter(
         self,
         user_id: str | UUID,
-        quarter_date_start: date,
-        quarter_date_end: date,
+        period_date_start: date,
+        period_date_end: date,
         outer_session: AsyncSession | None = None,
     ) -> list[Grades]:
         async with self.session_manager(outer_session) as session:
@@ -49,8 +49,8 @@ class DbManagerGrades(DbManagerBase):
                 select(Grades)
                 .where(Grades.user_id == user_id)
                 .where(
-                    (Grades.grading_date >= quarter_date_start)
-                    & (Grades.grading_date <= quarter_date_end)
+                    (Grades.grading_date >= period_date_start)
+                    & (Grades.grading_date <= period_date_end)
                 )
             )
             result = await session.exec(statement)

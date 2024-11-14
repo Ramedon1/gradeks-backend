@@ -12,14 +12,14 @@ def get_new_grade(grades: list[GradesInfo]) -> float:
     return round(weighted_sum / cont, 2) if grades else None
 
 
-async def get_diary_info(user_id: str) -> list[DiaryInfo]:
-    quarters = await db_manager.quarters.get_quarters()
+async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
+    periods = await db_manager.periods.get_periods_by_name(period_name)
 
     diary_info_list = []
 
-    for quarter in quarters:
+    for period in periods:
         user_grades = await db_manager.grades.get_grades_by_quarter(
-            user_id, quarter.quarter_date_start, quarter.quarter_date_end
+            user_id, period.period_date_start, period.period_date_end
         )
         subjects_dict = {}
 
@@ -53,8 +53,8 @@ async def get_diary_info(user_id: str) -> list[DiaryInfo]:
         )
         diary_info_list.append(
             DiaryInfo(
-                quarter_name=quarter.quarter_name,
-                quarter_date=f"{quarter.quarter_date_start.strftime('%d.%m.%y')} - {quarter.quarter_date_end.strftime('%d.%m.%y')}",
+                quarter_name=period.period_name,
+                quarter_date=f"{period.period_date_start.strftime('%d.%m.%y')} - {period.period_date_end.strftime('%d.%m.%y')}",
                 type_grade=await db_manager.users.get_grade_type(user_id),
                 subjects=subjects_list,
             )

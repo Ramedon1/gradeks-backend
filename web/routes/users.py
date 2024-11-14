@@ -6,19 +6,21 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import FileResponse
 
+from common.enums.periods import PeriodsEnum
 from db.manager import db_manager
 from rediska import redis_manager
 from scheduler.methods.grades import add_grades
 from tg.bot import bot
 from tg.common.web_app_keyboard import go_web_app
 from web.depends.access_token import current_user_id
+from web.exceptions.grades import GradeTypeException
 from web.exceptions.users import DiaryIdDException
 from web.methods.create_user import create_users
 from web.methods.fetch_user_data import fetch_user_data
 from web.methods.get_diary_info import get_diary_info
 from web.models.users.login import LoginRequest, LoginResponse
-from web.models.users.user import (DiaryConnect, LinkDiary, SpecDiaryInfo,
-                                   UserInfo)
+from web.models.users.user import (DiaryConnect, GradeTypeFilter, LinkDiary,
+                                   SpecDiaryInfo, UserInfo)
 
 user_router = APIRouter(prefix="/user", tags=["user"])
 
@@ -44,14 +46,19 @@ async def login(login_data: LoginRequest) -> LoginResponse:
     return LoginResponse(access_token=access_token)
 
 
-@user_router.get("/me")
-async def get_me(user_id: Annotated[str, Depends(current_user_id)]) -> UserInfo:
+@user_router.post("/me")
+async def get_me(
+    user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
+) -> UserInfo:
     user = await db_manager.users.get_user(user_id)
 
     if user.is_active is False:
         return UserInfo(is_active=user.is_active)
 
-    return await fetch_user_data(user_id)
+    if request.filter not in PeriodsEnum.__members__:
+        raise GradeTypeException
+
+    return await fetch_user_data(user_id, request.filter)
 
 
 @user_router.post("/link")

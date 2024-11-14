@@ -54,6 +54,10 @@ class DiaryConnect(BaseModel):
     diary_id: str
 
 
+class GradeTypeFilter(BaseModel):
+    filter: str
+
+
 class Distribution(BaseModel):
     distribution_status: bool | None
 

@@ -7,7 +7,7 @@ from scheduler.methods.web import get_grades_by_period
 
 
 async def process_user_grades(user):
-    quarters = await db_manager.quarters.get_quarters()
+    quarters = await db_manager.periods.get_periods_by_name("quarter")
     start_date, end_date = await get_current_period(quarters)
 
     if not start_date or not end_date:
