@@ -14,7 +14,6 @@ def get_new_grade(grades: list[GradesInfo]) -> float:
 
 async def get_diary_info(user_id: str) -> list[DiaryInfo]:
     quarters = await db_manager.quarters.get_quarters()
-
     diary_info_list = []
 
     for quarter in quarters:
@@ -37,20 +36,26 @@ async def get_diary_info(user_id: str) -> list[DiaryInfo]:
                 )
 
         subjects_list = (
-            [
-                SubjectsInfo(
-                    subject_name=subject_name,
-                    grades=(grades_info if grades_info else []),
-                    new_type_grade=(
-                        get_new_grade(grades_info) if grades_info else None
-                    ),
-                    old_type_grade=get_old_grade(grades_info) if grades_info else None,
-                )
-                for subject_name, grades_info in subjects_dict.items()
-            ]
+            sorted(
+                [
+                    SubjectsInfo(
+                        subject_name=subject_name,
+                        grades=(grades_info if grades_info else []),
+                        new_type_grade=(
+                            get_new_grade(grades_info) if grades_info else None
+                        ),
+                        old_type_grade=(
+                            get_old_grade(grades_info) if grades_info else None
+                        ),
+                    )
+                    for subject_name, grades_info in subjects_dict.items()
+                ],
+                key=lambda subject: subject.subject_name,
+            )
             if user_grades
             else []
         )
+
         diary_info_list.append(
             DiaryInfo(
                 quarter_name=quarter.quarter_name,
