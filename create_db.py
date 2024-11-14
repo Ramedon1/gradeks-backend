@@ -76,7 +76,6 @@ async def main() -> None:
         await session.commit()  # Commit user here
         await session.refresh(user)  # Refresh to ensure the user ID is available
 
-
     await db_manager.close()  # Ensure db_manager is closed properly
 
 

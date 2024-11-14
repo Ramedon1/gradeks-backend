@@ -59,8 +59,8 @@ async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
 
         diary_info_list.append(
             DiaryInfo(
-                quarter_name=quarter.quarter_name,
-                quarter_date=f"{quarter.quarter_date_start.strftime('%d.%m.%y')} - {quarter.quarter_date_end.strftime('%d.%m.%y')}",
+                quarter_name=period.quarter_name,
+                quarter_date=f"{period.quarter_date_start.strftime('%d.%m.%y')} - {period.quarter_date_end.strftime('%d.%m.%y')}",
                 type_grade=await db_manager.users.get_grade_type(user_id),
                 subjects=subjects_list,
             )

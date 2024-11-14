@@ -10,7 +10,7 @@ gradeks_dev/
 gradeks_connect/
 # Distribution / packaging
 migration
-gradeks_dev/
+
 .Python
 build/
 develop-eggs/

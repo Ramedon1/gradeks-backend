@@ -1,4 +1,3 @@
-from importlib.metadata import distribution
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException

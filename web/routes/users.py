@@ -92,7 +92,7 @@ async def link_diary(
         reply_markup=go_web_app(),
     )
     await db_manager.users.connect_diary(user_id, diary_id)
-    link_grades = await get_diary_info(user_id)
+    link_grades = await get_diary_info(user_id, "quarter")
 
     return LinkDiary(
         diary_info=link_grades,
