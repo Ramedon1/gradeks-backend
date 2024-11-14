@@ -1,14 +1,14 @@
 import asyncio
 
 from db.manager import db_manager
-from scheduler.methods.common import get_current_period
+from scheduler.methods.common import get_full_year
 from scheduler.methods.grades import update_grades
 from scheduler.methods.web import get_grades_by_period
 
 
 async def process_user_grades(user):
-    quarters = await db_manager.periods.get_periods_by_name("quarter")
-    start_date, end_date = await get_current_period(quarters)
+    quarters = await db_manager.quarters.get_quarters()
+    start_date, end_date = await get_full_year(quarters)
 
     if not start_date or not end_date:
         return

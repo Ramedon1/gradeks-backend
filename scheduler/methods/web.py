@@ -47,24 +47,23 @@ async def get_grades_by_period(
                     for item in result["data"]:
                         subject = item["SUBJECT_NAME"]
                         grades = []
+                        occupied_dates = set()
 
                         for mark in item["MARKS"]:
                             grade_date = datetime.strptime(
                                 mark["DATE"], "%d.%m.%Y"
                             ).date()
 
+                            while grade_date in occupied_dates:
+                                grade_date += timedelta(days=1)
+
+                            occupied_dates.add(grade_date)
+
                             grade = Grade(
                                 date=grade_date.isoformat(),
                                 grade=mark["VALUE"],
                                 weight=mark["WEIGHT"],
                             )
-
-                            while any(
-                                g.date == grade.date and g.weight == grade.weight
-                                for g in grades
-                            ):
-                                grade_date += timedelta(days=1)
-                                grade.date = grade_date.isoformat()
 
                             grades.append(grade)
 

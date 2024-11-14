@@ -12,14 +12,13 @@ def get_new_grade(grades: list[GradesInfo]) -> float:
     return round(weighted_sum / cont, 2) if grades else None
 
 
-async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
-    periods = await db_manager.periods.get_periods_by_name(period_name)
-
+async def get_diary_info(user_id: str) -> list[DiaryInfo]:
+    quarters = await db_manager.quarters.get_quarters()
     diary_info_list = []
 
-    for period in periods:
+    for quarter in quarters:
         user_grades = await db_manager.grades.get_grades_by_quarter(
-            user_id, period.period_date_start, period.period_date_end
+            user_id, quarter.quarter_date_start, quarter.quarter_date_end
         )
         subjects_dict = {}
 
@@ -37,24 +36,30 @@ async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
                 )
 
         subjects_list = (
-            [
-                SubjectsInfo(
-                    subject_name=subject_name,
-                    grades=(grades_info if grades_info else []),
-                    new_type_grade=(
-                        get_new_grade(grades_info) if grades_info else None
-                    ),
-                    old_type_grade=get_old_grade(grades_info) if grades_info else None,
-                )
-                for subject_name, grades_info in subjects_dict.items()
-            ]
+            sorted(
+                [
+                    SubjectsInfo(
+                        subject_name=subject_name,
+                        grades=(grades_info if grades_info else []),
+                        new_type_grade=(
+                            get_new_grade(grades_info) if grades_info else None
+                        ),
+                        old_type_grade=(
+                            get_old_grade(grades_info) if grades_info else None
+                        ),
+                    )
+                    for subject_name, grades_info in subjects_dict.items()
+                ],
+                key=lambda subject: subject.subject_name,
+            )
             if user_grades
             else []
         )
+
         diary_info_list.append(
             DiaryInfo(
-                quarter_name=period.period_name,
-                quarter_date=f"{period.period_date_start.strftime('%d.%m.%y')} - {period.period_date_end.strftime('%d.%m.%y')}",
+                quarter_name=quarter.quarter_name,
+                quarter_date=f"{quarter.quarter_date_start.strftime('%d.%m.%y')} - {quarter.quarter_date_end.strftime('%d.%m.%y')}",
                 type_grade=await db_manager.users.get_grade_type(user_id),
                 subjects=subjects_list,
             )
