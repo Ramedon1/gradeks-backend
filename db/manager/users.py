@@ -155,3 +155,13 @@ class DbManagerUsers(DbManagerBase):
             users = result.all()
 
             return users
+
+    async def get_all_users(
+        self, outer_session: AsyncSession | None = None
+    ) -> list[User]:
+        async with self.session_manager(outer_session) as session:
+            statement = select(User)
+            result = await session.exec(statement)
+            users = result.all()
+
+            return users

@@ -7,7 +7,7 @@ from aiogram.filters import CommandObject, CommandStart
 from aiogram.types import FSInputFile, Message
 
 from tg.bot import bot
-from tg.common.play_now_keyboard import get_play_now_keyboard
+from tg.common.keyboards.play_now_keyboard import get_play_now_keyboard
 
 main_router = Router()
 

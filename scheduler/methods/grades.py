@@ -8,7 +8,7 @@ from rediska import redis_manager
 from scheduler.methods.common import get_full_year
 from scheduler.methods.web import get_grades_by_period
 from tg.bot import bot
-from tg.common.web_app_keyboard import go_web_app
+from tg.common.keyboards.web_app_keyboard import go_web_app
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
