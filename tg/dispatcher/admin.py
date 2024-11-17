@@ -83,10 +83,7 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
         )
         await callback.message.answer(f"Таска {task_name} запущена.")
     if action == "deactivate":
-        task = next(
-            (task for task in tasks if task.get_name() == f"{task_name}"),
-            None
-        )
+        task = next((task for task in tasks if task.get_name() == f"{task_name}"), None)
 
         if task:
             task.cancel()
