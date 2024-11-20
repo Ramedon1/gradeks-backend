@@ -120,13 +120,13 @@ async def connect_diary_to_user(callback: CallbackQuery, state: FSMContext):
 
 @admin_router.message(AdminLinkDiaryStates.telegram_id)
 async def find_user(message: Message, state: FSMContext):
-    db_user_id = await db_manager.users.get_user_by_telegram_id(int(message.text))
+    db_user_id = await db_manager.users.get_user_id_by_telegram_id(int(message.text))
     if db_user_id:
         await state.update_data(telegram_id=message.text, user_id=db_user_id)
         await state.set_state(AdminLinkDiaryStates.diary_id)
         await bot.send_message(
             chat_id=message.from_user.id,
-            text="Введите ID дневника"
+            text="Введите URL ID дневника"
         )
     else:
         await bot.send_message(
@@ -138,9 +138,15 @@ async def find_user(message: Message, state: FSMContext):
 @admin_router.message(AdminLinkDiaryStates.diary_id)
 async def link_diary_admin(message: Message, state: FSMContext):
     data = await state.get_data()
-    await link_diary(user_id=data['user_id'], request=DiaryConnect(diary_id=message.text))
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text="Дневник привязан"
-    )
+    try:
+        await link_diary(user_id=data['user_id'], request=DiaryConnect(diary_id=message.text))
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text="Дневник привязан"
+        )
+    except Exception as e:
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text=f'Дневник не привязан: {e}'
+        )
     await state.clear()
