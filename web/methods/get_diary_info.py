@@ -24,7 +24,7 @@ async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
         subjects_dict = {}
 
         if user_grades:
-            for grade in user_grades:
+            for grade in sorted(user_grades, key=lambda g: g.grading_date):
                 subject_name = grade.subject
                 if subject_name not in subjects_dict:
                     subjects_dict[subject_name] = []
@@ -37,22 +37,19 @@ async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
                 )
 
         subjects_list = (
-            sorted(
-                [
-                    SubjectsInfo(
-                        subject_name=subject_name,
-                        grades=(grades_info if grades_info else []),
-                        new_type_grade=(
-                            get_new_grade(grades_info) if grades_info else None
-                        ),
-                        old_type_grade=(
-                            get_old_grade(grades_info) if grades_info else None
-                        ),
-                    )
-                    for subject_name, grades_info in subjects_dict.items()
-                ],
-                key=lambda subject: subject.subject_name,
-            )
+            [
+                SubjectsInfo(
+                    subject_name=subject_name,
+                    grades=(grades_info if grades_info else []),
+                    new_type_grade=(
+                        get_new_grade(grades_info) if grades_info else None
+                    ),
+                    old_type_grade=(
+                        get_old_grade(grades_info) if grades_info else None
+                    ),
+                )
+                for subject_name, grades_info in sorted(subjects_dict.items())
+            ]
             if user_grades
             else []
         )

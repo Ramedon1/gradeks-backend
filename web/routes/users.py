@@ -1,10 +1,8 @@
 import re
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter
 from fastapi.params import Depends
-from fastapi.responses import FileResponse
 
 from common.enums.periods import PeriodsEnum
 from db.manager import db_manager
@@ -101,11 +99,3 @@ async def link_diary(
             diary_link=True,
         ),
     )
-
-
-@user_router.get("/avatar/{tg_id}")
-async def get_avatar(tg_id: str) -> FileResponse:
-    image_path = Path(f"avatars/{tg_id}_avatar.jpg")
-    if not image_path.is_file():
-        return FileResponse(f"avatars/default_avatar.png")
-    return FileResponse(image_path)
