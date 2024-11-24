@@ -46,7 +46,7 @@ async def login(login_data: LoginRequest) -> LoginResponse:
 
 @user_router.post("/me")
 async def get_me(
-        user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
+    user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
 ) -> UserInfo:
     user = await db_manager.users.get_user(user_id)
 
@@ -61,7 +61,7 @@ async def get_me(
 
 @user_router.post("/link")
 async def link_diary(
-        user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
+    user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
 ) -> LinkDiary:
     match = re.search(r"participant=([\w\d]+)", request.diary_id)
     if not match:
@@ -82,7 +82,9 @@ async def link_diary(
             telegram_id,
             f"❌ Дневник не удалось привязать, не правильная ссылка для привязки.",
         )
-        return LinkDiary(spec_diary=SpecDiaryInfo(diary_id=None, diary_link=False), diary_info=None)
+        return LinkDiary(
+            spec_diary=SpecDiaryInfo(diary_id=None, diary_link=False), diary_info=None
+        )
 
     await bot.send_message(
         telegram_id,

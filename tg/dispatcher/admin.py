@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 import settings
+from common.common import log_task_exception
 from db.manager import db_manager
-from run import log_task_exception
 from tg.bot import bot
 from tg.common.keyboards.admin_keyboards import (TaskCallbackData,
                                                  get_admin_keyboard,
@@ -75,11 +75,12 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
     if action == "activate":
         if task_name == "scheduler":
             from scheduler.scheduler_grades import main
-            tasks = [
-                asyncio.create_task(main(), name="scheduler")
-            ]
+
+            tasks = [asyncio.create_task(main(), name="scheduler")]
             for task in tasks:
-                task.add_done_callback(lambda t: asyncio.create_task(log_task_exception(t)))
+                task.add_done_callback(
+                    lambda t: asyncio.create_task(log_task_exception(t))
+                )
             await asyncio.gather(*tasks, return_exceptions=True)
 
         else:
@@ -113,14 +114,12 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
         await callback.message.answer("Неизвестное действие.")
 
 
-
-@admin_router.callback_query(F.data == 'connect_diary_to_user')
+@admin_router.callback_query(F.data == "connect_diary_to_user")
 async def connect_diary_to_user(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     await state.set_state(AdminLinkDiaryStates.telegram_id)
     await bot.send_message(
-        chat_id=callback.from_user.id,
-        text="Введите ID пользователя "
+        chat_id=callback.from_user.id, text="Введите ID пользователя "
     )
 
 
@@ -130,23 +129,19 @@ async def find_user(message: Message, state: FSMContext):
     if db_user_id:
         await state.update_data(telegram_id=message.text, user_id=db_user_id)
         await state.set_state(AdminLinkDiaryStates.diary_id)
-        await bot.send_message(
-            chat_id=message.from_user.id,
-            text="Введите ID дневника"
-        )
+        await bot.send_message(chat_id=message.from_user.id, text="Введите ID дневника")
     else:
         await bot.send_message(
-            chat_id=message.from_user.id,
-            text="Пользователь не найден"
+            chat_id=message.from_user.id, text="Пользователь не найден"
         )
         await state.clear()
+
 
 @admin_router.message(AdminLinkDiaryStates.diary_id)
 async def link_diary_admin(message: Message, state: FSMContext):
     data = await state.get_data()
-    await link_diary(user_id=data['user_id'], request=DiaryConnect(diary_id=message.text))
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text="Дневник привязан"
+    await link_diary(
+        user_id=data["user_id"], request=DiaryConnect(diary_id=message.text)
     )
+    await bot.send_message(chat_id=message.from_user.id, text="Дневник привязан")
     await state.clear()

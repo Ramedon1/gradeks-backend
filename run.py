@@ -3,6 +3,7 @@ import asyncio
 import uvicorn
 
 import settings
+from common.common import log_task_exception
 from tg.bot import bot
 from tg.dispatcher import dp
 from web.app import fastapi_app
@@ -42,14 +43,6 @@ async def start_tasks():
         task.add_done_callback(lambda t: asyncio.create_task(log_task_exception(t)))
 
     await asyncio.gather(*tasks, return_exceptions=True)
-
-
-async def log_task_exception(task: asyncio.Task):
-    if task.exception():
-        await bot.send_message(
-            chat_id=admin_id,
-            text=f"Task {task.get_name()} failed with exception: {task.exception()}",
-        )
 
 
 async def main():

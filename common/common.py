@@ -1,6 +1,10 @@
+import asyncio
 from datetime import UTC, datetime
 
 from sqlmodel import Field
+
+import settings
+from tg.bot import bot
 
 
 def pg_now() -> datetime:
@@ -13,3 +17,11 @@ def CreatedAtField(index=False):  # noqa
         nullable=False,
         index=index,
     )
+
+
+async def log_task_exception(task: asyncio.Task):
+    if task.exception():
+        await bot.send_message(
+            chat_id=settings.ADMIN_ID,
+            text=f"Task {task.get_name()} failed with exception: {task.exception()}",
+        )
