@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, Message
 
 import settings
 from db.manager import db_manager
+from run import log_task_exception
 from tg.bot import bot
 from tg.common.keyboards.admin_keyboards import (TaskCallbackData,
                                                  get_admin_keyboard,
@@ -74,8 +75,13 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
     if action == "activate":
         if task_name == "scheduler":
             from scheduler.scheduler_grades import main
+            tasks = [
+                asyncio.create_task(main(), name="scheduler")
+            ]
+            for task in tasks:
+                task.add_done_callback(lambda t: asyncio.create_task(log_task_exception(t)))
+            await asyncio.gather(*tasks, return_exceptions=True)
 
-            asyncio.create_task(main(), name="Scheduler")
         else:
             await bot.delete_message(
                 chat_id=callback.from_user.id, message_id=callback.message.message_id
