@@ -82,6 +82,10 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
                     lambda t: asyncio.create_task(log_task_exception(t))
                 )
             await asyncio.gather(*tasks, return_exceptions=True)
+            await bot.delete_message(
+                chat_id=callback.from_user.id, message_id=callback.message.message_id
+            )
+            await callback.message.answer(f"Таска {task_name} запущена.")
 
         else:
             await bot.delete_message(
@@ -89,28 +93,15 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
             )
             await callback.message.answer("Неизвестная таска.")
 
-        await bot.delete_message(
-            chat_id=callback.from_user.id, message_id=callback.message.message_id
-        )
-        await callback.message.answer(f"Таска {task_name} запущена.")
     if action == "deactivate":
         task = next((task for task in tasks if task.get_name() == f"{task_name}"), None)
 
         if task:
             task.cancel()
-            await bot.delete_message(
-                chat_id=callback.from_user.id, message_id=callback.message.message_id
-            )
             await callback.message.answer(f"Таска {task_name} остановлена.")
         else:
-            await bot.delete_message(
-                chat_id=callback.from_user.id, message_id=callback.message.message_id
-            )
             await callback.message.answer(f"Таска {task_name} не найдена.")
     else:
-        await bot.delete_message(
-            chat_id=callback.from_user.id, message_id=callback.message.message_id
-        )
         await callback.message.answer("Неизвестное действие.")
 
 
