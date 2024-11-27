@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from datetime import datetime
 
 from db.manager import db_manager
@@ -17,84 +16,102 @@ logger = logging.getLogger(__name__)
 async def update_grades(user_id, new_grades):
     logger.info(f"Updating grades for user_id: {user_id}")
     telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
+
+    # Retrieve existing grades from the database
     existing_grades = await db_manager.grades.get_grades_by_user(user_id)
     existing_grades_map = {(g.subject, g.grading_date): g for g in existing_grades}
 
-    processed_keys = set()
-    new_grades_count = defaultdict(int)
+    # Map new grades by (subject, grading_date)
+    new_grades_map = {
+        (
+            new_grade.subject,
+            datetime.strptime(grade_entry.date, "%Y-%m-%d").date(),
+        ): grade_entry
+        for new_grade in new_grades
+        for grade_entry in new_grade.grades
+    }
 
-    for new_grade in new_grades:
-        for grade_entry in new_grade.grades:
-            grading_date = datetime.strptime(grade_entry.date, "%Y-%m-%d").date()
+    # Sets of grade keys for efficient comparison
+    existing_keys = set(existing_grades_map.keys())
+    new_keys = set(new_grades_map.keys())
 
-            grade_key = (new_grade.subject, grading_date)
-            processed_keys.add(grade_key)
-            new_grades_count[new_grade.subject] += 1
+    # Grades to add, update, and delete
+    keys_to_add = new_keys - existing_keys
+    keys_to_update = existing_keys & new_keys
+    keys_to_delete = existing_keys - new_keys
 
-            if grade_key in existing_grades_map:
-                existing_grade = existing_grades_map[grade_key]
+    # Process updates
+    for key in keys_to_update:
+        existing_grade = existing_grades_map[key]
+        new_grade_entry = new_grades_map[key]
 
-                if (
-                    existing_grade.grade != grade_entry.grade
-                    and existing_grade.grade_weight != grade_entry.weight
-                ):
-                    logger.info(f"Updating grade for {grade_key}")
-                    await db_manager.grades.change_grade(
-                        grade_id=existing_grade.grade_id,
-                        new_grade=grade_entry.grade,
-                        grade_weight=grade_entry.weight,
-                    )
-                    await redis_manager.new_grades.update_grade_in_redis(
-                        user_id=user_id,
-                        subject=new_grade.subject,
-                        grading_date=grading_date.strftime("%d-%m"),
-                        new_grade=grade_entry.grade,
-                        old_grade=existing_grade.grade,
-                        grade_weight=grade_entry.weight,
-                    )
+        if (
+            existing_grade.grade != new_grade_entry.grade
+            or existing_grade.grade_weight != new_grade_entry.weight
+        ):
+            logger.info(f"Updating grade for {key}")
+            await db_manager.grades.change_grade(
+                grade_id=existing_grade.grade_id,
+                new_grade=new_grade_entry.grade,
+                grade_weight=new_grade_entry.weight,
+            )
+            await redis_manager.new_grades.update_grade_in_redis(
+                user_id=user_id,
+                subject=key[0],
+                grading_date=key[1].strftime("%d-%m"),
+                new_grade=new_grade_entry.grade,
+                old_grade=existing_grade.grade,
+                grade_weight=new_grade_entry.weight,
+            )
+            await bot.send_message(
+                chat_id=telegram_id,
+                text=f'🔃 Обновили оценку на {key[1].strftime("%d.%m.%Y")}. \n'
+                f"📚 Предмет: {existing_grade.subject} \n"
+                f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade}",
+                reply_markup=go_web_app(),
+            )
 
-                    await bot.send_message(
-                        chat_id=telegram_id,
-                        text=f'🔃 Обновили оценку на {existing_grade.grading_date.strftime("%d.%m.%Y")}. \n'
-                        f"📚 Предмет: {existing_grade.subject} \n"
-                        f"Была оценка: {existing_grade.grade} | Стала оценка: {grade_entry.grade}",
-                        reply_markup=go_web_app(),
-                    )
-            else:
-                logger.info(f"Adding new grade for {grade_key}")
-                new_db_grade = Grades(
-                    user_id=user_id,
-                    subject=new_grade.subject,
-                    grading_date=grading_date,
-                    grade=grade_entry.grade,
-                    grade_weight=grade_entry.weight,
-                )
-                await db_manager.grades.add_grade(new_db_grade)
+    # Process additions
+    for key in keys_to_add:
+        subject, grading_date = key
+        grade_entry = new_grades_map[key]
+        logger.info(f"Adding new grade for {key}")
 
-                await redis_manager.new_grades.add_new_grade_to_redis(
-                    user_id=user_id,
-                    subject=new_grade.subject,
-                    grading_date=grading_date.strftime("%d-%m"),
-                    grade=grade_entry.grade,
-                    grade_weight=grade_entry.weight,
-                )
+        new_db_grade = Grades(
+            user_id=user_id,
+            subject=subject,
+            grading_date=grading_date,
+            grade=grade_entry.grade,
+            grade_weight=grade_entry.weight,
+        )
+        await db_manager.grades.add_grade(new_db_grade)
+        await redis_manager.new_grades.add_new_grade_to_redis(
+            user_id=user_id,
+            subject=subject,
+            grading_date=grading_date.strftime("%d-%m"),
+            grade=grade_entry.grade,
+            grade_weight=grade_entry.weight,
+        )
+        await bot.send_message(
+            chat_id=telegram_id,
+            text=f"🗓 Новая оценка. \n"
+            f"📚 Предмет: {new_db_grade.subject} \n"
+            f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
+            reply_markup=go_web_app(),
+        )
 
-                await bot.send_message(
-                    chat_id=telegram_id,
-                    text=f"🗓 Новая оценка. \n"
-                    f"📚 Предмет: {new_db_grade.subject} \n"
-                    f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
-                    reply_markup=go_web_app(),
-                )
-
-    for existing_grade in existing_grades:
-        grade_key = (existing_grade.subject, existing_grade.grading_date)
-
-        if grade_key not in processed_keys:
-            if new_grades_count[existing_grade.subject] > 0:
-                new_grades_count[existing_grade.subject] -= 1
-                logger.info(f"Removing outdated grade for {grade_key}")
-                await db_manager.grades.delete_grade(existing_grade.grade_id)
+    # Process deletions
+    for key in keys_to_delete:
+        existing_grade = existing_grades_map[key]
+        logger.info(f"Removing outdated grade for {key}")
+        await db_manager.grades.delete_grade(existing_grade.grade_id)
+        await bot.send_message(
+            chat_id=telegram_id,
+            text=f"🗑 Удалена оценка \n"
+            f"📚 Предмет: {existing_grade.subject} \n"
+            f'Оценка: {existing_grade.grade} | {existing_grade.grading_date.strftime("%d.%m.%Y")}',
+            reply_markup=go_web_app(),
+        )
 
     logger.info(f"Grades updated successfully for user_id: {user_id}")
 

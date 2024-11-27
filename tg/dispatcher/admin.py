@@ -64,46 +64,55 @@ async def back_to_admin_menu(callback: CallbackQuery):
     await admin_menu(callback)
 
 
+from aiogram import types
+from aiogram.types import CallbackQuery
+import asyncio
+
+async def log_task_exception(task: asyncio.Task):
+    try:
+        await task
+    except Exception as e:
+        print(f"Task {task.get_name()} raised an exception: {e}")
+
 @admin_router.callback_query(TaskCallbackData.filter())
 async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbackData):
     action = callback_data.action
     task_name = callback_data.task
-    tasks = asyncio.all_tasks()
 
     await callback.answer()
 
     if action == "activate":
         if task_name == "scheduler":
+            existing_task = next(
+                (task for task in asyncio.all_tasks() if task.get_name() == task_name),
+                None
+            )
+            if existing_task and not existing_task.done():
+                await callback.message.answer(f"Таска {task_name} уже запущена.")
+                return
+
             from scheduler.scheduler_grades import main
 
-            tasks = [asyncio.create_task(main(), name="scheduler")]
-            for task in tasks:
-                task.add_done_callback(
-                    lambda t: asyncio.create_task(log_task_exception(t))
-                )
-            await asyncio.gather(*tasks, return_exceptions=True)
-            await bot.delete_message(
-                chat_id=callback.from_user.id, message_id=callback.message.message_id
-            )
-            await callback.message.answer(f"Таска {task_name} запущена.")
+            task = asyncio.create_task(main(), name=task_name)
 
+            task.add_done_callback(lambda t: asyncio.create_task(log_task_exception(t)))
+
+            await callback.message.answer(f"Таска {task_name} запущена.")
         else:
-            await bot.delete_message(
-                chat_id=callback.from_user.id, message_id=callback.message.message_id
-            )
             await callback.message.answer("Неизвестная таска.")
 
-    if action == "deactivate":
-        task = next((task for task in tasks if task.get_name() == f"{task_name}"), None)
-
-        if task:
-            task.cancel()
+    elif action == "deactivate":
+        existing_task = next(
+            (task for task in asyncio.all_tasks() if task.get_name() == task_name),
+            None
+        )
+        if existing_task and not existing_task.done():
+            existing_task.cancel()
             await callback.message.answer(f"Таска {task_name} остановлена.")
         else:
-            await callback.message.answer(f"Таска {task_name} не найдена.")
+            await callback.message.answer(f"Таска {task_name} не найдена или уже остановлена.")
     else:
         await callback.message.answer("Неизвестное действие.")
-
 
 @admin_router.callback_query(F.data == "connect_diary_to_user")
 async def connect_diary_to_user(callback: CallbackQuery, state: FSMContext):
