@@ -64,15 +64,6 @@ async def back_to_admin_menu(callback: CallbackQuery):
     await admin_menu(callback)
 
 
-from aiogram import types
-from aiogram.types import CallbackQuery
-import asyncio
-
-async def log_task_exception(task: asyncio.Task):
-    try:
-        await task
-    except Exception as e:
-        print(f"Task {task.get_name()} raised an exception: {e}")
 
 @admin_router.callback_query(TaskCallbackData.filter())
 async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbackData):
@@ -113,6 +104,7 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
             await callback.message.answer(f"Таска {task_name} не найдена или уже остановлена.")
     else:
         await callback.message.answer("Неизвестное действие.")
+
 
 @admin_router.callback_query(F.data == "connect_diary_to_user")
 async def connect_diary_to_user(callback: CallbackQuery, state: FSMContext):
