@@ -12,9 +12,7 @@ def day_grade_img(date: str, grade: int, coff: int, subject: str):
     subject_font_path = "fonts/PFEncoreSansPro-Medium.ttf"
 
     # Draw the Grade
-    draw.text(
-        (722, 775), str(grade), fill=get_color_grade(grade), font=grade_font
-    )
+    draw.text((722, 775), str(grade), fill=get_color_grade(grade), font=grade_font)
 
     # Draw the Coff
     draw.text((885, 695), str(coff), fill="white", font=coff_font)
@@ -41,6 +39,4 @@ def day_grade_img(date: str, grade: int, coff: int, subject: str):
         draw.text((x_subject, y_subject), line, fill="#074E46", font=subject_font)
         y_subject += line_height + line_spacing
 
-    template.convert("RGB").save("output_image.jpg")
-
-    return
+    return template.convert("RGB")

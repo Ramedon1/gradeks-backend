@@ -107,14 +107,12 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
         await callback.message.answer("Неизвестное действие.")
 
 
-
-@admin_router.callback_query(F.data == 'connect_diary_to_user')
+@admin_router.callback_query(F.data == "connect_diary_to_user")
 async def connect_diary_to_user(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     await state.set_state(AdminLinkDiaryStates.telegram_id)
     await bot.send_message(
-        chat_id=callback.from_user.id,
-        text="Введите ID пользователя "
+        chat_id=callback.from_user.id, text="Введите ID пользователя "
     )
 
 
@@ -125,28 +123,25 @@ async def find_user(message: Message, state: FSMContext):
         await state.update_data(telegram_id=message.text, user_id=db_user_id)
         await state.set_state(AdminLinkDiaryStates.diary_id)
         await bot.send_message(
-            chat_id=message.from_user.id,
-            text="Введите URL ID дневника"
+            chat_id=message.from_user.id, text="Введите URL ID дневника"
         )
     else:
         await bot.send_message(
-            chat_id=message.from_user.id,
-            text="Пользователь не найден"
+            chat_id=message.from_user.id, text="Пользователь не найден"
         )
         await state.clear()
+
 
 @admin_router.message(AdminLinkDiaryStates.diary_id)
 async def link_diary_admin(message: Message, state: FSMContext):
     data = await state.get_data()
     try:
-        await link_diary(user_id=data['user_id'], request=DiaryConnect(diary_id=message.text))
-        await bot.send_message(
-            chat_id=message.from_user.id,
-            text="Дневник привязан"
+        await link_diary(
+            user_id=data["user_id"], request=DiaryConnect(diary_id=message.text)
         )
+        await bot.send_message(chat_id=message.from_user.id, text="Дневник привязан")
     except Exception as e:
         await bot.send_message(
-            chat_id=message.from_user.id,
-            text=f'Дневник не привязан: {e}'
+            chat_id=message.from_user.id, text=f"Дневник не привязан: {e}"
         )
     await state.clear()
