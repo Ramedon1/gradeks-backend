@@ -13,7 +13,9 @@ async def subject_grade_img(
     image_width = 1250
     padding_from_edge = 80
 
-    logo = Image.open("imagination/templates/logo.png").convert("RGBA").resize(logo_size)
+    logo = (
+        Image.open("imagination/templates/logo.png").convert("RGBA").resize(logo_size)
+    )
 
     initial_height = 512
     img = Image.new("RGB", (image_width, initial_height), "#144f3b")
@@ -25,7 +27,9 @@ async def subject_grade_img(
     img_with_alpha.paste(logo, (logo_x, logo_y), mask=logo)
 
     # Write "Gradeks" opposite the logo
-    gradeks_font = ImageFont.truetype("imagination/fonts/DMSans_24pt-Black.ttf", font_size + 10)
+    gradeks_font = ImageFont.truetype(
+        "imagination/fonts/DMSans_24pt-Black.ttf", font_size + 10
+    )
     gradeks_x = logo_x + logo_size[0] + 50
     gradeks_y = (logo_size[1] - (font_size + 10)) // 2 + logo_y
     draw = ImageDraw.Draw(img_with_alpha)
@@ -34,7 +38,11 @@ async def subject_grade_img(
     # Define the subject name and adjust its position dynamically
     subject_name = subject
     subject_font, wrapped_subject = get_dynamic_font(
-        subject, 275, 86, "imagination/fonts/PFEncoreSansPro-Medium.ttf", initial_font_size=65
+        subject,
+        275,
+        86,
+        "imagination/fonts/PFEncoreSansPro-Medium.ttf",
+        initial_font_size=65,
     )
 
     # Calculate the width of the subject text

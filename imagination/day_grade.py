@@ -1,5 +1,3 @@
-import asyncio
-
 from PIL import Image, ImageDraw, ImageFont
 
 from imagination.common import get_color_grade, get_dynamic_font

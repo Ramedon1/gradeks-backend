@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Tuple, Any
+from typing import Any, Tuple
 from uuid import UUID
 
 from sqlalchemy import update
@@ -23,10 +23,10 @@ class DbManagerGrades(DbManagerBase):
             return grades
 
     async def get_grades_by_subject(
-            self,
-            user_id: str | UUID,
-            subject: str,
-            outer_session: AsyncSession | None = None,
+        self,
+        user_id: str | UUID,
+        subject: str,
+        outer_session: AsyncSession | None = None,
     ) -> list[GradesInfo]:
         async with self.session_manager(outer_session) as session:
             statement = (
@@ -133,10 +133,10 @@ class DbManagerGrades(DbManagerBase):
             await session.commit()
 
     async def get_subject_name_by_ilike_subject(
-            self,
-            user_id: str | UUID,
-            subject: str,
-            outer_session: AsyncSession | None = None,
+        self,
+        user_id: str | UUID,
+        subject: str,
+        outer_session: AsyncSession | None = None,
     ) -> str | None:
         async with self.session_manager(outer_session) as session:
             statement = (
