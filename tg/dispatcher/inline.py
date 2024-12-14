@@ -3,7 +3,7 @@ from io import BytesIO
 from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.types import (BufferedInputFile, ChosenInlineResult, FSInputFile,
-                           InlineQuery, InputMediaPhoto)
+                           InlineQuery, InputMediaPhoto, InlineQueryResultCachedAudio)
 
 from db.manager import db_manager
 from imagination.day_grade import day_grade_img
