@@ -8,7 +8,7 @@ from sqlmodel import Field, SQLModel
 
 class Grades(SQLModel, table=True):
     """
-    Данные о оценках пользователя.
+    Данные об оценках пользователя.
 
     Attributes:
         grade_id (UUID): внутренний идентификатор оценки

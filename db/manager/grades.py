@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Tuple, Any
 from uuid import UUID
 
 from sqlalchemy import update
@@ -7,6 +8,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
 from db.models.grades import Grades
+from web.models.users.user import GradesInfo
 
 
 class DbManagerGrades(DbManagerBase):
@@ -21,11 +23,11 @@ class DbManagerGrades(DbManagerBase):
             return grades
 
     async def get_grades_by_subject(
-        self,
-        user_id: str | UUID,
-        subject: str,
-        outer_session: AsyncSession | None = None,
-    ) -> list[Grades]:
+            self,
+            user_id: str | UUID,
+            subject: str,
+            outer_session: AsyncSession | None = None,
+    ) -> list[GradesInfo]:
         async with self.session_manager(outer_session) as session:
             statement = (
                 select(Grades)
@@ -35,7 +37,16 @@ class DbManagerGrades(DbManagerBase):
             result = await session.exec(statement)
             grades = result.all()
 
-            return grades
+            grades_info = [
+                GradesInfo(
+                    coff=grade.grade_weight,
+                    grade=grade.grade,
+                    date=grade.grading_date.isoformat() if grade.grading_date else None,
+                )
+                for grade in grades
+            ]
+
+            return grades_info
 
     async def get_grades_by_quarter(
         self,
@@ -94,23 +105,6 @@ class DbManagerGrades(DbManagerBase):
 
             return grade if grade else None
 
-    async def get_grade_by_subject(
-        self,
-        user_id: str | UUID,
-        subject: str,
-        outer_session: AsyncSession | None = None,
-    ) -> Grades:
-        async with self.session_manager(outer_session) as session:
-            statement = (
-                select(Grades)
-                .where(Grades.user_id == user_id)
-                .where(Grades.subject == subject)
-            )
-            result = await session.exec(statement)
-            grade = result.all()
-
-            return grade if grade else None
-
     async def delete_grade(
         self, grade_id: str | UUID, outer_session: AsyncSession | None = None
     ):
@@ -137,3 +131,23 @@ class DbManagerGrades(DbManagerBase):
                 await session.delete(grade)
 
             await session.commit()
+
+    async def get_subject_name_by_ilike_subject(
+            self,
+            user_id: str | UUID,
+            subject: str,
+            outer_session: AsyncSession | None = None,
+    ) -> str | None:
+        async with self.session_manager(outer_session) as session:
+            statement = (
+                select(Grades.subject)
+                .where(Grades.user_id == user_id)
+                .where(Grades.subject.ilike(f"%{subject}%"))
+            )
+            result = await session.execute(statement)
+            subjects = result.scalars().all()
+
+            if not subjects:
+                return None
+
+            return subjects[0]

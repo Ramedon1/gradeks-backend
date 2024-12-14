@@ -97,8 +97,8 @@ def create_badge(grade: int, coff: int) -> Image:
         fill=notification_color,
     )
 
-    font_large = ImageFont.truetype("fonts/DMSans_24pt-Black.ttf", 40)
-    font_small = ImageFont.truetype("fonts/DMSans_24pt-Black.ttf", 23)
+    font_large = ImageFont.truetype("imagination/fonts/DMSans_24pt-Black.ttf", 40)
+    font_small = ImageFont.truetype("imagination/fonts/DMSans_24pt-Black.ttf", 23)
 
     text = str(grade)
     text_bbox = draw.textbbox((0, 0), text, font=font_large)
@@ -176,7 +176,7 @@ def subject_with_line_grades(
     old_type_grade: float,
 ):
     # Calculate dimensions for the subject text
-    font = ImageFont.truetype("fonts/PFEncoreSansPro-Medium.ttf", 60)
+    font = ImageFont.truetype("imagination/fonts/PFEncoreSansPro-Medium.ttf", 60)
     temp_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
     draw = ImageDraw.Draw(temp_image)
 
@@ -197,7 +197,7 @@ def subject_with_line_grades(
     img = Image.new("RGBA", (final_width + 50, final_height), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
-    grades_font = ImageFont.truetype("fonts/PFEncoreSansPro-Medium.ttf", 45)
+    grades_font = ImageFont.truetype("imagination/fonts/PFEncoreSansPro-Medium.ttf", 45)
     # Grades as separate parts with a slash
     new_grade_text = f"{new_type_grade:.1f}"
     old_grade_text = f"{old_type_grade:.1f}"
