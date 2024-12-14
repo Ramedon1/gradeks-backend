@@ -165,3 +165,15 @@ class DbManagerUsers(DbManagerBase):
             users = result.all()
 
             return users
+
+    async def get_user_id_by_telegram_id(
+        self, telegram_id: int, outer_session: AsyncSession | None = None
+    ) -> str | UUID:
+        async with self.session_manager(outer_session) as session:
+            user_id = (
+                await session.exec(
+                    select(User.user_id).where(User.telegram_id == telegram_id)
+                )
+            ).one_or_none()
+
+            return user_id

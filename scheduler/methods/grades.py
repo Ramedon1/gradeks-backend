@@ -117,7 +117,7 @@ async def update_grades(user_id, new_grades):
 
 
 async def add_grades(user_id, diary_id):
-    quarters = await db_manager.periods.get_periods_by_name("quarter")
+    quarters = await db_manager.periods.get_periods_by_period_name("quarter")
     start_date, end_date = await get_full_year(quarters)
 
     if (start_date, end_date) is None:

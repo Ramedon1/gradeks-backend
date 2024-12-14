@@ -13,7 +13,7 @@ def get_new_grade(grades: list[GradesInfo]) -> float:
 
 
 async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
-    periods = await db_manager.periods.get_periods_by_name(period_name)
+    periods = await db_manager.periods.get_periods_by_period_name(period_name)
 
     diary_info_list = []
 
@@ -64,3 +64,59 @@ async def get_diary_info(user_id: str, period_name: str) -> list[DiaryInfo]:
         )
 
     return diary_info_list
+
+
+async def get_diary_info_by_period(user_id: str, period_name: str) -> DiaryInfo:
+    period = await db_manager.periods.get_period_by_name(period_name)
+    diary_info_list = []
+
+    user_grades = await db_manager.grades.get_grades_by_quarter(
+        user_id, period.period_date_start, period.period_date_end
+    )
+
+    subjects_dict = {}
+
+    if user_grades:
+        for grade in user_grades:
+            subject_name = grade.subject
+            if subject_name not in subjects_dict:
+                subjects_dict[subject_name] = []
+            subjects_dict[subject_name].append(
+                GradesInfo(
+                    coff=grade.grade_weight,
+                    grade=grade.grade,
+                    date=grade.grading_date.strftime("%d.%m"),
+                )
+            )
+
+    subjects_list = (
+        sorted(
+            [
+                SubjectsInfo(
+                    subject_name=subject_name,
+                    grades=(grades_info if grades_info else []),
+                    new_type_grade=(
+                        get_new_grade(grades_info) if grades_info else None
+                    ),
+                    old_type_grade=(
+                        get_old_grade(grades_info) if grades_info else None
+                    ),
+                )
+                for subject_name, grades_info in subjects_dict.items()
+            ],
+            key=lambda subject: subject.subject_name,
+        )
+        if user_grades
+        else []
+    )
+
+    diary_info_list.append(
+        DiaryInfo(
+            quarter_name=period_name,
+            quarter_date=f"{period.period_date_start.strftime('%d.%m.%y')} - {period.period_date_end.strftime('%d.%m.%y')}",
+            type_grade=await db_manager.users.get_grade_type(user_id),
+            subjects=subjects_list,
+        )
+    )
+
+    return diary_info_list[0]
