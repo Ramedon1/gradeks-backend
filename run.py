@@ -35,6 +35,8 @@ async def start_server():
 async def start_tasks():
     tasks = [
         asyncio.create_task(start_bot(), name="bot"),
+        asyncio.create_task(start_server(), name="server"),
+        asyncio.create_task(start_scheduler(), name="scheduler"),
     ]
 
     for task in tasks:
