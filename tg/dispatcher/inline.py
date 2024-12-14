@@ -2,8 +2,9 @@ from io import BytesIO
 
 from aiogram import Router
 from aiogram.enums import ParseMode
+from aiogram.filters import Command
 from aiogram.types import (BufferedInputFile, ChosenInlineResult, FSInputFile,
-                           InlineQuery, InputMediaPhoto, InlineQueryResultCachedAudio)
+                           InlineQuery, InputMediaPhoto, InlineQueryResultCachedAudio, Message)
 
 from db.manager import db_manager
 from imagination.day_grade import day_grade_img
@@ -21,37 +22,37 @@ periods_data = {
     "Первое полугодие": {
         "title": "Первое полугодие",
         "id": "semester_one",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMpZ1n7zeAJGH9toBeCw1IAAW-Dns-pAAJIWQACjZHQSu1wVjNIJpEuNgQ",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBLWddp2Ww0Jg89pxoX7TImWC5PFKDAALTbgACgoToSnLFFSblr917NgQ",
     },
     "Второе полугодие": {
         "title": "Второе полугодие",
         "id": "semester_two",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMqZ1n7zQsThs5GFPg4UTjY6cOzWXQAAklZAAKNkdBKfpouJxp403U2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBLmddp2YQn-nH7aH5scndd_gPXZ0CAALUbgACgoToSpbEMH8nhZ1YNgQ",
     },
     "Первая четверть": {
         "title": "Первая четверть",
         "id": "quarter_first",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMlZ1n7xiKLseYBYNuCwEWCXbg08NcAAkRZAAKNkdBK2ni6e0hjwoA2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBL2ddp2Z-FFI5ULgyu-BYHSoGVWzuAALWbgACgoToSoNaQTG4rkcQNgQ",
     },
     "Вторая четверть": {
         "title": "Вторая четверть",
         "id": "quarter_second",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMmZ1n7zBWF7bumSLKLdd6u_DIneVgAAkVZAAKNkdBK06A9ZPDe1Hs2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBMGddp2dg2IEdR-MPkHJ4ZCmHpL85AALXbgACgoToSsJqv_OAoRdkNgQ",
     },
     "Третья четверть": {
         "title": "Третья четверть",
         "id": "quarter_third",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMnZ1n7zGjKQjhSoVb_3uL3rO0wQRMAAkZZAAKNkdBKVo0HwjCyoAg2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBMWddp2e2A-8Jt84leNWWGIqok5ZlAALYbgACgoToSmZ73OpwpvoMNgQ",
     },
     "Четвертая четверть": {
         "title": "Четвертая четверть",
         "id": "quarter_fourth",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMoZ1n7zKC8tJtF7uskvFnvnNhXSfoAAkdZAAKNkdBKwgQa2kJf7uM2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBMmddp226haXQIS67yMdUmvMo9rq2AALZbgACgoToSmAgXKEZbbLsNgQ",
     },
     "Все оценки": {
         "title": "Все оценки",
         "id": "year",
-        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAMrZ1n70danILltuO8KglyI0VbGUdUAAkpZAAKNkdBKBg3fjK1vhMc2BA",
+        "audio_file_id": "CQACAgIAAyEGAASPGL1TAAIBM2ddp256aPtCkebQEnjVfxOYU6gxAALabgACgoToSq6NEycwrUaWNgQ",
     },
 }
 
