@@ -4,7 +4,8 @@ from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import (BufferedInputFile, ChosenInlineResult, FSInputFile,
-                           InlineQuery, InputMediaPhoto, InlineQueryResultCachedAudio, Message)
+                           InlineQuery, InlineQueryResultCachedAudio,
+                           InputMediaPhoto, Message)
 
 from db.manager import db_manager
 from imagination.day_grade import day_grade_img
@@ -254,7 +255,7 @@ async def handle_chosen_result(chosen_result: ChosenInlineResult):
             await chosen_result.bot.edit_message_media(
                 media=InputMediaPhoto(
                     media=photo.photo[-1].file_id,
-                    caption=f"☕️ Все оценки за {period_name}",
+                    caption=f"☕️ {period_name}",
                 ),
                 inline_message_id=chosen_result.inline_message_id,
                 reply_markup=inline_send(),
