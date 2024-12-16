@@ -18,7 +18,7 @@ async def create_users(telegram_data: WebAppInitData) -> User:
     if telegram_data.start_param:
         await db_manager.referral.set_referral(
             user_id=user.user_id,
-            invited_by=telegram_data.user.id,
+            invited_by=int(telegram_data.start_param.split("_")[1]),
         )
         await bot.send_message(
             int(telegram_data.start_param.split("_")[1]),
