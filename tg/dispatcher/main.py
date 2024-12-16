@@ -14,10 +14,6 @@ main_router = Router()
 async def start(message: Message, command: CommandObject):
     keyboard = get_play_now_keyboard()
 
-    if command.args:
-        if re.match(r"r_[0-9]+", command.args):
-            keyboard = get_play_now_keyboard(ref=command.args.replace("r_", ""))
-
     animation = FSInputFile("static/gradeks.mp4", filename="gradeks.mp4")
 
     await bot.send_animation(
