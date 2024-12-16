@@ -47,7 +47,7 @@ class DbManagerReferrals(DbManagerBase):
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> ReferralCheckListDiary:
         async with self.session_manager(outer_session) as session:
-            referral = ReferralCheckListDiary(user_id=user_id, linked=True)
+            referral = ReferralCheckListDiary(user_id=user_id, linked_diary=True)
             session.add(referral)
 
             await session.commit()
