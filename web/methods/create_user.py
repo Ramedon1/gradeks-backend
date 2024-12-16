@@ -16,8 +16,7 @@ async def create_users(telegram_data: WebAppInitData) -> User:
     await db_manager.distribution.create_distributions_user(user_id=user.user_id)
 
     if telegram_data.start_param:
-        print(telegram_data.start_param)
-        print(telegram_data.start_param.split("_")[1])
+
         await db_manager.referral.set_referral(
             user_id=user.user_id,
             invited_by=int(telegram_data.start_param.split("_")[1]),

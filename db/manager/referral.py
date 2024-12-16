@@ -33,7 +33,9 @@ class DbManagerReferrals(DbManagerBase):
 
             return referral
 
-    async def get_referrals(self, invited_by: int, outer_session: AsyncSession | None = None) -> list[Referral] | None:
+    async def get_referrals(
+        self, invited_by: int, outer_session: AsyncSession | None = None
+    ) -> list[Referral] | None:
         async with self.session_manager(outer_session) as session:
             statement = select(Referral).where(Referral.invited_by == invited_by)
             result = await session.exec(statement)
@@ -57,7 +59,9 @@ class DbManagerReferrals(DbManagerBase):
         self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> ReferralCheckListDiary | None:
         async with self.session_manager(outer_session) as session:
-            statement = select(ReferralCheckListDiary).where(ReferralCheckListDiary.user_id == user_id)
+            statement = select(ReferralCheckListDiary).where(
+                ReferralCheckListDiary.user_id == user_id
+            )
             result = await session.exec(statement)
             referral = result.one_or_none()
 

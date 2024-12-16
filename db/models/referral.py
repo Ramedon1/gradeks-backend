@@ -16,7 +16,7 @@ class Referral(SQLModel, table=True):
     __tablename__ = "referrals"
 
     user_id: UUID4 = Field(foreign_key="users.user_id", primary_key=True)
-    invited_by: int | None = Field(default_factory=uuid.uuid4)
+    invited_by: int | None = Field(nullable=True)
 
 
 class ReferralCheckListDiary(SQLModel, table=True):
@@ -32,4 +32,3 @@ class ReferralCheckListDiary(SQLModel, table=True):
 
     user_id: UUID4 = Field(foreign_key="users.user_id", primary_key=True)
     linked_diary: bool = Field(default=False)
-
