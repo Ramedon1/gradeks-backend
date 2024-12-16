@@ -42,8 +42,28 @@ async def get_spec_diary_info(user_id: str) -> SpecDiaryInfo:
 
 
 async def get_referrals(user_id: str) -> list[ReferralInfo]:
-    referrals = await db_manager.referral.get_referral(user_id)
+    tg_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
+    referrals = await db_manager.referral.get_referrals(tg_id)
     return [
         ReferralInfo.model_validate(referral, from_attributes=True)
         for referral in referrals
     ]
+
+
+async def get_special_referrals(user_id: str) -> list[ReferralInfo]:
+    tg_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
+    referrals = await db_manager.referral.get_referrals(tg_id)
+    validated_referrals = []
+
+    if not referrals:
+        return []
+
+    for referral_data in referrals:
+        referral = ReferralInfo.model_validate(referral_data, from_attributes=True)
+        diary_linked = await db_manager.referral.get_diary_linked(referral.user_id)
+        if not diary_linked:
+            continue
+        if diary_linked.linked_diary:
+            validated_referrals.append(referral)
+
+    return validated_referrals

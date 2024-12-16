@@ -92,6 +92,17 @@ async def link_diary(
         reply_markup=go_web_app(),
     )
     await db_manager.users.connect_diary(user_id, diary_id)
+
+    ref_invited = await db_manager.referral.get_referral_invited(user_id)
+    linked_before = await db_manager.referral.get_diary_linked(user_id)
+
+    if ref_invited.invited_by and (linked_before is None):
+        await db_manager.referral.set_diary_linked(user_id=user_id)
+        await bot.send_message(
+            ref_invited.invited_by,
+            f"🎉 Ваш друг привязал дневник, вы получаете бонусы!",
+        )
+
     link_grades = await get_diary_info(user_id, "quarter")
 
     return LinkDiary(

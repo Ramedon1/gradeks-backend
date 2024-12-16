@@ -25,7 +25,7 @@ class DiaryInfo(BaseModel):
 
 class ReferralInfo(BaseModel):
     user_id: UUID
-    invited_by: str
+    invited_by: int
 
 
 class NewGrade(BaseModel):
