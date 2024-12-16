@@ -85,12 +85,14 @@ async def link_diary(
         return LinkDiary(
             spec_diary=SpecDiaryInfo(diary_id=None, diary_link=False), diary_info=None
         )
-
-    await bot.send_message(
-        telegram_id,
-        f"🎉 Дневник успешно привязан, оценки доступны в приложении!",
-        reply_markup=go_web_app(),
-    )
+    try:
+        await bot.send_message(
+            telegram_id,
+            f"🎉 Дневник успешно привязан, оценки доступны в приложении!",
+            reply_markup=go_web_app(),
+        )
+    except:
+        pass
     await db_manager.users.connect_diary(user_id, diary_id)
 
     ref_invited = await db_manager.referral.get_referral_invited(user_id)
@@ -98,11 +100,13 @@ async def link_diary(
 
     if ref_invited.invited_by and (linked_before is None):
         await db_manager.referral.set_diary_linked(user_id=user_id)
-        await bot.send_message(
-            ref_invited.invited_by,
-            f"🎉 Ваш друг привязал дневник, вы получаете бонусы!",
-        )
-
+        try:
+            await bot.send_message(
+                ref_invited.invited_by,
+                f"🎉 Ваш друг привязал дневник, вы получаете бонусы!",
+            )
+        except:
+            pass
     link_grades = await get_diary_info(user_id, "quarter")
 
     return LinkDiary(

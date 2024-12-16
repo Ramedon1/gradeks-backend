@@ -63,14 +63,16 @@ async def update_grades(user_id, new_grades):
                 old_grade=existing_grade.grade,
                 grade_weight=new_grade_entry.weight,
             )
-            await bot.send_message(
-                chat_id=telegram_id,
-                text=f'🔃 Обновили оценку на {key[1].strftime("%d.%m.%Y")}. \n'
-                f"📚 Предмет: {existing_grade.subject} \n"
-                f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade}",
-                reply_markup=go_web_app(),
-            )
-
+            try:
+                await bot.send_message(
+                    chat_id=telegram_id,
+                    text=f'🔃 Обновили оценку на {key[1].strftime("%d.%m.%Y")}. \n'
+                    f"📚 Предмет: {existing_grade.subject} \n"
+                    f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade}",
+                    reply_markup=go_web_app(),
+                )
+            except:
+                pass
     # Process additions
     for key in keys_to_add:
         subject, grading_date = key
@@ -92,27 +94,31 @@ async def update_grades(user_id, new_grades):
             grade=grade_entry.grade,
             grade_weight=grade_entry.weight,
         )
-        await bot.send_message(
-            chat_id=telegram_id,
-            text=f"🗓 Новая оценка. \n"
-            f"📚 Предмет: {new_db_grade.subject} \n"
-            f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
-            reply_markup=go_web_app(),
-        )
-
+        try:
+            await bot.send_message(
+                chat_id=telegram_id,
+                text=f"🗓 Новая оценка. \n"
+                f"📚 Предмет: {new_db_grade.subject} \n"
+                f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
+                reply_markup=go_web_app(),
+            )
+        except:
+            pass
     # Process deletions
     for key in keys_to_delete:
         existing_grade = existing_grades_map[key]
         logger.info(f"Removing outdated grade for {key}")
         await db_manager.grades.delete_grade(existing_grade.grade_id)
-        await bot.send_message(
-            chat_id=telegram_id,
-            text=f"🗑 Удалена оценка \n"
-            f"📚 Предмет: {existing_grade.subject} \n"
-            f'Оценка: {existing_grade.grade} | {existing_grade.grading_date.strftime("%d.%m.%Y")}',
-            reply_markup=go_web_app(),
-        )
-
+        try:
+            await bot.send_message(
+                chat_id=telegram_id,
+                text=f"🗑 Удалена оценка \n"
+                f"📚 Предмет: {existing_grade.subject} \n"
+                f'Оценка: {existing_grade.grade} | {existing_grade.grading_date.strftime("%d.%m.%Y")}',
+                reply_markup=go_web_app(),
+            )
+        except:
+            pass
     logger.info(f"Grades updated successfully for user_id: {user_id}")
 
 
