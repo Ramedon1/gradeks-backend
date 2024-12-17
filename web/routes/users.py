@@ -69,11 +69,6 @@ async def link_diary(
 
     diary_id = match.group(1)
 
-    # Проверяем, есть ли оценки, если да, то удаляем их
-    existing_diary = await db_manager.grades.get_grades_by_user(user_id)
-    if len(existing_diary) > 0:
-        await db_manager.grades.delete_grades_by_user(user_id)
-
     result = await add_grades(user_id, diary_id)
     telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
 
@@ -93,6 +88,11 @@ async def link_diary(
         )
     except:
         pass
+    # Проверяем, есть ли оценки, если да, то удаляем их
+    existing_diary = await db_manager.grades.get_grades_by_user(user_id)
+    if len(existing_diary) > 0:
+        await db_manager.grades.delete_grades_by_user(user_id)
+
     await db_manager.users.connect_diary(user_id, diary_id)
 
     ref_invited = await db_manager.referral.get_referral_invited(user_id)
