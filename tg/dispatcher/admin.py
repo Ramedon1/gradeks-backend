@@ -36,7 +36,6 @@ async def admin_menu(message: Message | CallbackQuery):
             f"📖 Пользователи, которые подключили дневник: {len(await db_manager.users.get_users_diary_connected())}\n"
             f"📚 Активные таски: {tasks_str}\n",
             reply_markup=keyboard,
-            parse_mode="MarkdownV2",
         )
 
 
