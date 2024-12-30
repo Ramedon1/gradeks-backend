@@ -76,6 +76,10 @@ async def handle_task_action(callback: CallbackQuery, callback_data: TaskCallbac
             from scheduler.scheduler_grades import main
 
             asyncio.create_task(main(), name="Scheduler")
+        if task_name == "scheduler_finally":
+            from scheduler.scheduler_finally_grades import main
+
+            asyncio.create_task(main(), name="Scheduler")
         else:
             await bot.delete_message(
                 chat_id=callback.from_user.id, message_id=callback.message.message_id

@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from datetime import date, datetime, timedelta
@@ -6,7 +7,7 @@ import aiohttp
 from fake_useragent import UserAgent
 
 import settings
-from scheduler.models import Grade, NewGrade
+from scheduler.models import Grade, GradeFinal, NewGrade, Period
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -76,4 +77,65 @@ async def get_grades_by_period(
                 logger.debug(f"Response content: {await response.text()}")
 
     logger.warning("No grades returned.")
+    return []
+
+
+async def get_final_grades(diary_id: str) -> list[GradeFinal]:
+    data = {
+        "apikey": "ytokgwebvrxughawekfinvpusbvp",
+        "guid": diary_id,
+    }
+
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Host": "mp.edu.orb.ru",
+        "Connection": "Keep-Alive",
+        "User-Agent": UserAgent().random,
+        "Accept-Encoding": "gzip, deflate, br",
+    }
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.post(
+            "https://mp.edu.orb.ru/journals/periodmarks",
+            json=data,
+            proxy=proxy_url,
+        ) as response:
+            if response.status == 200:
+                result = await response.json()
+                final_grades = []
+                for subject_data in result["data"]:
+                    subject_name = subject_data["NAME"]
+                    periods = []
+
+                    for period_data in subject_data["PERIODS"]:
+                        grades = []
+                        mark = period_data.get("MARK")
+
+                        if mark:
+                            grades.append(
+                                Grade(
+                                    date=None,
+                                    grade=mark["VALUE"],
+                                    weight=mark["WEIGHT"],
+                                )
+                            )
+
+                        periods.append(
+                            Period(
+                                name=period_data["NAME"],
+                                date_begin=period_data["DATE_BEGIN"],
+                                date_end=period_data["DATE_END"],
+                                grades=grades if grades else None,
+                            )
+                        )
+
+                    final_grades.append(
+                        GradeFinal(subject=subject_name, periods=periods)
+                    )
+                return final_grades
+            else:
+                logger.error(f"Unexpected response status: {response.status}")
+                logger.debug(f"Response content: {await response.text()}")
+
+    logger.warning("No final grades returned.")
     return []

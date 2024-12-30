@@ -31,9 +31,3 @@ async def get_grades(
     if request.filter not in PeriodsEnum.__members__:
         raise GradeFilterTypeException
     return await get_diary_info(user_id, request.filter)
-
-
-@grade_router.post("/finally")
-async def finally_grades():
-    pass
-    # TODO: Потом сделать итоговые оценки за четвери и годовые

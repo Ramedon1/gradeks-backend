@@ -26,6 +26,12 @@ async def start_scheduler():
     await main()
 
 
+async def start_scheduler_finally():
+    from scheduler.scheduler_finally_grades import main
+
+    await main()
+
+
 async def start_server():
     config = uvicorn.Config(fastapi_app, host="0.0.0.0")
     server = uvicorn.Server(config)
@@ -37,6 +43,7 @@ async def start_tasks():
         asyncio.create_task(start_bot(), name="bot"),
         asyncio.create_task(start_server(), name="server"),
         asyncio.create_task(start_scheduler(), name="scheduler"),
+        asyncio.create_task(start_scheduler_finally(), name="scheduler_finally"),
     ]
 
     for task in tasks:

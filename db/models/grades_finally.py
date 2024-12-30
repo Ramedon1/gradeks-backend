@@ -1,22 +1,15 @@
+import uuid
+
 from pydantic import UUID4
-from sqlalchemy import UUID
 from sqlmodel import Field, SQLModel
 
 
 class GradesFinally(SQLModel, table=True):
-    """
-    Данные о оценках пользователя.
-
-    Attributes:
-        user_id (UUID): внутренний идентификатор пользователя
-        quarter (str): название четверти, по которому стоит оценка
-        subject (str): название предмета, по которому стоит оценка
-        grade (int): оценка
-    """
 
     __tablename__ = "grades_finally"
 
-    user_id: UUID4 = Field(foreign_key="users.user_id", primary_key=True)
+    grade_finally_id: UUID4 = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: UUID4 = Field(foreign_key="users.user_id")
     quarter: str = Field(default=None, nullable=True)
     subject: str = Field(default=None, nullable=True)
     grade: int = Field(default=None, nullable=True)

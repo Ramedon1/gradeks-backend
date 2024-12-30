@@ -39,7 +39,13 @@ def get_tasks_keyboard(action: str):
                     callback_data=TaskCallbackData(
                         action=action, task="scheduler"
                     ).pack(),
-                )
+                ),
+                InlineKeyboardButton(
+                    text="📝 Проверка финальных оценок",
+                    callback_data=TaskCallbackData(
+                        action=action, task="scheduler_finally"
+                    ).pack(),
+                ),
             ],
             [
                 InlineKeyboardButton(

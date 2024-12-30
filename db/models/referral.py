@@ -1,7 +1,7 @@
 import uuid
 
 from pydantic import UUID4
-from sqlalchemy import Column, BigInteger
+from sqlalchemy import BigInteger, Column
 from sqlmodel import Field, SQLModel
 
 

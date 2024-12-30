@@ -3,6 +3,16 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 
+class InfoFinallyGrade(BaseModel):
+    subject: str
+    grade: int
+
+
+class FinallyGrade(BaseModel):
+    quarter_name: str
+    info_grades: list[InfoFinallyGrade] | None
+
+
 class GradesInfo(BaseModel):
     coff: int
     grade: int
@@ -31,9 +41,10 @@ class ReferralInfo(BaseModel):
 class NewGrade(BaseModel):
     grade: int
     old_grade: int | None
-    date: str
+    date: str | None
     subject: str
     coff: int
+    is_final: bool | None
 
 
 class GradeType(BaseModel):
@@ -68,8 +79,7 @@ class UserInfo(BaseModel):
     new_grades: list[NewGrade] | None = None
     distribution: bool | None = None
     referrals: list[ReferralInfo] | None = None
+    final_grades: list[FinallyGrade] | None = None
     is_active: bool = True
-
-    # TODO: В будущем сделать итоговые оценки
 
     model_config = ConfigDict(from_attributes=True)

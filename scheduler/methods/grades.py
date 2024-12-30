@@ -1,11 +1,14 @@
+import asyncio
 import logging
 from datetime import datetime
+from uuid import UUID
 
 from db.manager import db_manager
 from db.models.grades import Grades
 from rediska import redis_manager
 from scheduler.methods.common import get_full_year
-from scheduler.methods.web import get_grades_by_period
+from scheduler.methods.web import get_final_grades, get_grades_by_period
+from scheduler.models import GradeFinal
 from tg.bot import bot
 from tg.common.keyboards.web_app_keyboard import go_web_app
 
@@ -104,7 +107,7 @@ async def update_grades(user_id, new_grades):
             )
         except:
             pass
-    # Process deletions
+
     for key in keys_to_delete:
         existing_grade = existing_grades_map[key]
         logger.info(f"Removing outdated grade for {key}")
@@ -160,3 +163,102 @@ async def add_grades(user_id, diary_id):
     else:
         logger.error("Failed to get grades from web")
         raise "Failed to get grades from web"
+
+
+async def add_new_finally_grades(user_id: str | UUID, new_grades: list[GradeFinal]):
+    """
+    Add or update final grades for a user based on the GradeFinal model.
+
+    Args:
+        user_id (str | UUID): Unique identifier for the user.
+        new_grades (list[GradeFinal]): List of GradeFinal objects containing periods and grades.
+
+    Raises:
+        Exception: If there's an issue with adding or updating grades.
+    """
+
+    logger.info(f"Adding or updating final grades for user_id: {user_id}")
+
+    telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
+
+    existing_finally_grades = (
+        await db_manager.grades_finally.get_finally_grades_by_user_id(user_id)
+    )
+    existing_finally_grades_map = {
+        (g.subject, g.quarter): g for g in existing_finally_grades
+    }
+
+    for grade_final in new_grades:
+        subject = grade_final.subject
+
+        for period in grade_final.periods:
+            quarter = period.name
+
+            if not period.grades or isinstance(period.grades, str):
+                logger.info(f"No grades provided for {subject} in {quarter}. Skipping.")
+                continue
+
+            final_grade = max((grade.grade for grade in period.grades), default=None)
+
+            if final_grade is None:
+                logger.info(f"No valid grades for {subject} in {quarter}. Skipping.")
+                continue
+
+            grade_key = (subject, quarter)
+
+            if grade_key in existing_finally_grades_map:
+                existing_grade = existing_finally_grades_map[grade_key]
+
+                if existing_grade.grade != final_grade:
+                    logger.info(f"Updating final grade for {grade_key}")
+
+                    await redis_manager.new_grades.update_grade_in_redis(
+                        user_id=user_id,
+                        subject=subject,
+                        grading_date=quarter,
+                        new_grade=final_grade,
+                        old_grade=existing_grade.grade,
+                        grade_weight=1,
+                    )
+
+                    await bot.send_message(
+                        chat_id=telegram_id,
+                        text=f"🔃 Обновлена итоговая оценка по {subject} \n"
+                        f"📅 {quarter} \n"
+                        f"📊 Была оценка: {existing_grade.grade} | Стала оценка: {final_grade}",
+                        reply_markup=go_web_app(),
+                    )
+
+                    await db_manager.grades_finally.change_finally_grade(
+                        user_id=user_id,
+                        new_grade=int(final_grade),
+                        subject=subject,
+                        quarter=quarter,
+                    )
+                else:
+                    logger.info(f"Final grade for {grade_key} is unchanged. Skipping.")
+            else:
+                logger.info(f"Adding new final grade for {grade_key}")
+                await redis_manager.new_grades.add_new_grade_to_redis(
+                    user_id=user_id,
+                    subject=subject,
+                    grading_date=quarter,
+                    grade=final_grade,
+                    grade_weight=1,
+                    is_final=True,
+                )
+                await bot.send_message(
+                    chat_id=telegram_id,
+                    text=f"👏 Выставлена итоговая оценка по {subject} \n"
+                    f"📅 {quarter} \n"
+                    f"📊 Оценка: {final_grade}",
+                    reply_markup=go_web_app(),
+                )
+                await db_manager.grades_finally.add_finally_grade(
+                    user_id=user_id,
+                    grade=int(final_grade),
+                    subject=subject,
+                    quarter=quarter,
+                )
+
+    logger.info(f"Final grades updated successfully for user_id: {user_id}")
