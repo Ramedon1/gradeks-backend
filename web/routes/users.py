@@ -7,7 +7,7 @@ from fastapi.params import Depends
 from common.enums.periods import PeriodsEnum
 from db.manager import db_manager
 from rediska import redis_manager
-from scheduler.methods.grades import add_grades
+from scheduler.methods.grades import add_grades, add_finally_grades
 from tg.bot import bot
 from tg.common.keyboards.web_app_keyboard import go_web_app
 from web.depends.access_token import current_user_id
@@ -46,7 +46,7 @@ async def login(login_data: LoginRequest) -> LoginResponse:
 
 @user_router.post("/me")
 async def get_me(
-    user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
+        user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
 ) -> UserInfo:
     user = await db_manager.users.get_user(user_id)
 
@@ -69,10 +69,12 @@ async def link_diary(
 
     diary_id = match.group(1)
 
-    result = await add_grades(user_id, diary_id)
+    add_grades_result = await add_grades(user_id, diary_id)
+    add_finally_grades_result = await add_finally_grades(user_id)
+
     telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
 
-    if result:
+    if add_grades_result and add_finally_grades_result:
         await bot.send_message(
             telegram_id,
             f"❌ Дневник не удалось привязать, не правильная ссылка для привязки.",
@@ -80,18 +82,6 @@ async def link_diary(
         return LinkDiary(
             spec_diary=SpecDiaryInfo(diary_id=None, diary_link=False), diary_info=None
         )
-    try:
-        await bot.send_message(
-            telegram_id,
-            f"🎉 Дневник успешно привязан, оценки доступны в приложении!",
-            reply_markup=go_web_app(),
-        )
-    except:
-        pass
-    # Проверяем, есть ли оценки, если да, то удаляем их
-    existing_diary = await db_manager.grades.get_grades_by_user(user_id)
-    if len(existing_diary) > 0:
-        await db_manager.grades.delete_grades_by_user(user_id)
 
     await db_manager.users.connect_diary(user_id, diary_id)
 
@@ -108,6 +98,15 @@ async def link_diary(
         except:
             pass
     link_grades = await get_diary_info(user_id, "quarter")
+
+    try:
+        await bot.send_message(
+            telegram_id,
+            f"🎉 Дневник успешно привязан, оценки доступны в приложении!",
+            reply_markup=go_web_app(),
+        )
+    except:
+        pass
 
     return LinkDiary(
         diary_info=link_grades,

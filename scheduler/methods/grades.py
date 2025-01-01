@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import datetime
 from uuid import UUID
@@ -7,7 +6,7 @@ from db.manager import db_manager
 from db.models.grades import Grades
 from rediska import redis_manager
 from scheduler.methods.common import get_full_year
-from scheduler.methods.web import get_final_grades, get_grades_by_period
+from scheduler.methods.web import get_grades_by_period, get_final_grades
 from scheduler.models import GradeFinal
 from tg.bot import bot
 from tg.common.keyboards.web_app_keyboard import go_web_app
@@ -137,17 +136,13 @@ async def add_grades(user_id, diary_id):
     logger.info(f"First adding grades for user_id: {user_id}")
 
     if len(new_grades) > 0:
-        existing_grades = await db_manager.grades.get_grades_by_user(user_id)
-        existing_grades_map = {(g.subject, g.grading_date): g for g in existing_grades}
+        existing_diary = await db_manager.grades.get_grades_by_user(user_id)
+        if len(existing_diary) > 0:
+            await db_manager.grades.delete_grades_by_user(user_id)
 
         for new_grade in new_grades:
             for grade_entry in new_grade.grades:
                 grading_date = datetime.strptime(grade_entry.date, "%Y-%m-%d").date()
-                grade_key = (new_grade.subject, grading_date)
-
-                if grade_key in existing_grades_map:
-                    logger.info(f"Grade for {grade_key} already exists. Skipping.")
-                    continue
 
                 new_db_grade = Grades(
                     user_id=user_id,
@@ -262,3 +257,50 @@ async def add_new_finally_grades(user_id: str | UUID, new_grades: list[GradeFina
                 )
 
     logger.info(f"Final grades updated successfully for user_id: {user_id}")
+
+
+async def add_finally_grades(user_id: str | UUID):
+    """
+    Add final grades for a user based on the GradeFinal model.
+
+    Args:
+        user_id (str | UUID): Unique identifier for the user.
+
+    Raises:
+        Exception: If there's an issue with adding grades.
+    """
+    user = await db_manager.users.get_spec_diary_info(user_id)
+    new_grades = await get_final_grades(user.diary_id)
+
+    if not new_grades:
+        logger.info(f"No final grades to add for user_id: {user_id}")
+        raise "Failed to get grades from web"
+
+    logger.info(f"Adding final grades for user_id: {user_id}")
+
+    for grade_final in new_grades:
+        subject = grade_final.subject
+
+        for period in grade_final.periods:
+            quarter = period.name
+
+            if not period.grades or isinstance(period.grades, str):
+                logger.info(f"No grades provided for {subject} in {quarter}. Skipping.")
+                continue
+
+            final_grade = max((grade.grade for grade in period.grades), default=None)
+
+            if final_grade is None:
+                logger.info(f"No valid grades for {subject} in {quarter}. Skipping.")
+                continue
+
+            logger.info(f"Adding final grade for {subject} in {quarter}: {final_grade}")
+
+            await db_manager.grades_finally.add_finally_grade(
+                user_id=user_id,
+                grade=int(final_grade),
+                subject=subject,
+                quarter=quarter,
+            )
+
+    logger.info(f"Final grades added successfully for user_id: {user_id}")
