@@ -61,7 +61,7 @@ async def get_me(
 
 @user_router.post("/link")
 async def link_diary(
-    user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
+        user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
 ) -> LinkDiary:
     match = re.search(r"participant=([\w\d]+)", request.diary_id)
     if not match:
@@ -88,7 +88,7 @@ async def link_diary(
     ref_invited = await db_manager.referral.get_referral_invited(user_id)
     linked_before = await db_manager.referral.get_diary_linked(user_id)
 
-    if ref_invited.invited_by and (linked_before is None):
+    if ref_invited is not None and ref_invited.invited_by and (linked_before is None):
         await db_manager.referral.set_diary_linked(user_id=user_id)
         try:
             await bot.send_message(
@@ -97,6 +97,7 @@ async def link_diary(
             )
         except:
             pass
+
     link_grades = await get_diary_info(user_id, "quarter")
 
     try:
