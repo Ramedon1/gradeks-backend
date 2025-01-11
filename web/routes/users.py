@@ -70,7 +70,8 @@ async def link_diary(
     diary_id = match.group(1)
 
     add_grades_result = await add_grades(user_id, diary_id)
-    add_finally_grades_result = await add_finally_grades(user_id)
+
+    add_finally_grades_result = await add_finally_grades(user_id, diary_id)
 
     telegram_id = await db_manager.users.get_telegram_id_by_user_id(user_id)
 

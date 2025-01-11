@@ -260,7 +260,7 @@ async def add_new_finally_grades(user_id: str | UUID, new_grades: list[GradeFina
     logger.info(f"Final grades updated successfully for user_id: {user_id}")
 
 
-async def add_finally_grades(user_id: str | UUID):
+async def add_finally_grades(user_id: str | UUID, diary_id: str):
     """
     Add final grades for a user based on the GradeFinal model.
 
@@ -270,14 +270,21 @@ async def add_finally_grades(user_id: str | UUID):
     Raises:
         Exception: If there's an issue with adding grades.
     """
-    user = await db_manager.users.get_spec_diary_info(user_id)
-    new_grades = await get_final_grades(user.diary_id)
+    new_grades = await get_final_grades(diary_id)
+
 
     if not new_grades:
         logger.info(f"No final grades to add for user_id: {user_id}")
         raise "Failed to get grades from web"
 
     logger.info(f"Adding final grades for user_id: {user_id}")
+
+    existing_diary = await db_manager.grades_finally.get_finally_grades_by_user_id(user_id)
+
+    if len(existing_diary) > 0:
+        await db_manager.users.disconnect_diary(user_id)
+        await db_manager.grades_finally.delete_finally_grades_by_user_id(user_id)
+
 
     for grade_final in new_grades:
         subject = grade_final.subject

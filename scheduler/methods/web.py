@@ -101,41 +101,51 @@ async def get_final_grades(diary_id: str) -> list[GradeFinal]:
             proxy=proxy_url,
         ) as response:
             if response.status == 200:
-                result = await response.json()
-                final_grades = []
-                for subject_data in result["data"]:
-                    subject_name = subject_data["NAME"]
-                    periods = []
+                try:
+                    result = await response.json()
+                    if "data" not in result:
+                        logger.error("Response does not contain 'data' key")
+                        logger.debug(f"Full response: {result}")
+                        return []
 
-                    for period_data in subject_data["PERIODS"]:
-                        grades = []
-                        mark = period_data.get("MARK")
+                    final_grades = []
+                    for subject_data in result["data"]:
+                        subject_name = subject_data["NAME"]
+                        periods = []
 
-                        if mark:
-                            grades.append(
-                                Grade(
-                                    date=None,
-                                    grade=mark["VALUE"],
-                                    weight=mark["WEIGHT"],
+                        for period_data in subject_data["PERIODS"]:
+                            grades = []
+                            mark = period_data.get("MARK")
+
+                            if mark:
+                                grades.append(
+                                    Grade(
+                                        date=None,
+                                        grade=mark["VALUE"],
+                                        weight=mark["WEIGHT"],
+                                    )
+                                )
+
+                            periods.append(
+                                Period(
+                                    name=period_data["NAME"],
+                                    date_begin=period_data["DATE_BEGIN"],
+                                    date_end=period_data["DATE_END"],
+                                    grades=grades if grades else None,
                                 )
                             )
 
-                        periods.append(
-                            Period(
-                                name=period_data["NAME"],
-                                date_begin=period_data["DATE_BEGIN"],
-                                date_end=period_data["DATE_END"],
-                                grades=grades if grades else None,
-                            )
+                        final_grades.append(
+                            GradeFinal(subject=subject_name, periods=periods)
                         )
+                    return final_grades
 
-                    final_grades.append(
-                        GradeFinal(subject=subject_name, periods=periods)
-                    )
-                return final_grades
+                except Exception as e:
+                    logger.exception(f"Error parsing response: {e}")
+                    logger.debug(f"Response content: {await response.text()}")
+                    return []
+
             else:
                 logger.error(f"Unexpected response status: {response.status}")
                 logger.debug(f"Response content: {await response.text()}")
-
-    logger.warning("No final grades returned.")
-    return []
+                return []
