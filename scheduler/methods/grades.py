@@ -138,6 +138,7 @@ async def add_grades(user_id, diary_id):
     if len(new_grades) > 0:
         existing_diary = await db_manager.grades.get_grades_by_user(user_id)
         if len(existing_diary) > 0:
+            await db_manager.users.disconnect_diary(user_id)
             await db_manager.grades.delete_grades_by_user(user_id)
 
         for new_grade in new_grades:
