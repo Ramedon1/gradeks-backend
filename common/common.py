@@ -19,9 +19,17 @@ def CreatedAtField(index=False):  # noqa
     )
 
 
+import re
+
+
 async def log_task_exception(task: asyncio.Task):
     if task.exception():
+        exception_message = str(task.exception())
+
+        sanitized_message = re.sub(r'<.*?>', '', exception_message)
+        sanitized_message = sanitized_message.replace('\n', ' ')
+
         await bot.send_message(
             chat_id=settings.ADMIN_ID,
-            text=f"Task {task.get_name()} failed with exception: {task.exception()}",
+            text=f"Task {task.get_name()} failed with exception: {sanitized_message}",
         )
