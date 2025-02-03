@@ -33,7 +33,7 @@ async def get_grades_by_period(
         "Accept-Encoding": "gzip, deflate, br",
     }
 
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(headers=headers, timeout=aiohttp.ClientTimeout(total=80)) as session:
         async with session.post(
             "https://mp.edu.orb.ru/journals/marksbyperiod",
             json=data,
