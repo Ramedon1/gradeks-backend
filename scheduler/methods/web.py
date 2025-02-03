@@ -31,7 +31,6 @@ async def get_grades_by_period(
         "Connection": "Keep-Alive",
         "User-Agent": UserAgent().random,
         "Accept-Encoding": "gzip, deflate, br",
-        "Content-Length": str(len(json.dumps(data))),
     }
 
     async with aiohttp.ClientSession(headers=headers) as session:
