@@ -24,6 +24,7 @@ import re
 
 async def log_task_exception(task: asyncio.Task):
     if task.exception():
+        print(task.exception())
         exception_message = str(task.exception())
 
         sanitized_message = re.sub(r'<.*?>', '', exception_message)
