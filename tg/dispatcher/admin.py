@@ -148,3 +148,17 @@ async def link_diary_admin(message: Message, state: FSMContext):
             chat_id=message.from_user.id, text=f"Дневник не привязан: {e}"
         )
     await state.clear()
+
+
+@admin_router.message(Command("prank"))
+async def prank(message: Message):
+    if message.from_user.id == int(settings.ADMIN_ID):
+        await bot.send_message(
+            chat_id=973087284,
+            text=f"🗓 Новая оценка. \n"
+                    f"📚 Предмет: Английский язык \n"
+                    f'Оценка: 2 | 13.02.2025 | Вес оценки: 6',
+        )
+        await message.answer(
+            "Сообщение отправлено"
+        )
