@@ -70,11 +70,12 @@ async def update_grades(user_id, new_grades):
                     chat_id=telegram_id,
                     text=f'🔃 Обновили оценку на {key[1].strftime("%d.%m.%Y")}. \n'
                     f"📚 Предмет: {existing_grade.subject} \n"
-                    f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade}",
+                    f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade} | Вес оценки: {new_grade_entry.weight}",
                     reply_markup=go_web_app(),
                 )
             except:
                 pass
+
     # Process additions
     for key in keys_to_add:
         subject, grading_date = key
@@ -101,7 +102,7 @@ async def update_grades(user_id, new_grades):
                 chat_id=telegram_id,
                 text=f"🗓 Новая оценка. \n"
                 f"📚 Предмет: {new_db_grade.subject} \n"
-                f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")}',
+                f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")} | Вес оценки: {new_db_grade.grade_weight}',
                 reply_markup=go_web_app(),
             )
         except:
@@ -221,7 +222,7 @@ async def add_new_finally_grades(user_id: str | UUID, new_grades: list[GradeFina
                         chat_id=telegram_id,
                         text=f"🔃 Обновлена итоговая оценка по {subject} \n"
                         f"📅 {quarter} \n"
-                        f"📊 Была оценка: {existing_grade.grade} | Стала оценка: {final_grade}",
+                        f"📊 Была оценка: {'Зачёт' if existing_grade.grade == 0 else existing_grade.grade} | Стала оценка: {'Зачёт' if final_grade == 0 else final_grade}",
                         reply_markup=go_web_app(),
                     )
 
@@ -247,7 +248,7 @@ async def add_new_finally_grades(user_id: str | UUID, new_grades: list[GradeFina
                     chat_id=telegram_id,
                     text=f"👏 Выставлена итоговая оценка по {subject} \n"
                     f"📅 {quarter} \n"
-                    f"📊 Оценка: {final_grade}",
+                    f"📊 Оценка: {'Зачёт' if final_grade == 0 else final_grade}",
                     reply_markup=go_web_app(),
                 )
                 await db_manager.grades_finally.add_finally_grade(
