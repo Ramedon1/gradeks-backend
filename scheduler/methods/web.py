@@ -7,6 +7,7 @@ import aiohttp
 from fake_useragent import UserAgent
 
 import settings
+from scheduler.executor import SafeRequestExecutor
 from scheduler.models import Grade, GradeFinal, NewGrade, Period
 
 logging.basicConfig(level=logging.INFO)
@@ -34,46 +35,37 @@ async def get_grades_by_period(
     }
 
     async with aiohttp.ClientSession(headers=headers, timeout=aiohttp.ClientTimeout(total=80)) as session:
-        async with session.post(
-            "https://mp.edu.orb.ru/journals/marksbyperiod",
-            json=data,
-            proxy=proxy_url,
-        ) as response:
-            if response.status == 200:
-                result = await response.json()
-                if "data" in result:
-                    grades_by_subject = []
+        executor = SafeRequestExecutor(session)
+        try:
+            result = await executor.post(
+                "https://mp.edu.orb.ru/journals/marksbyperiod",
+                json=data,
+                headers=headers,
+                proxy=proxy_url,
+            )
+        except Exception as e:
+            logger.error("Запрос завершился ошибкой: %s", e)
+            return []
 
-                    for item in result["data"]:
-                        subject = item["SUBJECT_NAME"]
-                        grades = []
-                        occupied_dates = set()
-
-                        for mark in item["MARKS"]:
-                            grade_date = datetime.strptime(
-                                mark["DATE"], "%d.%m.%Y"
-                            ).date()
-
-                            while grade_date in occupied_dates:
-                                grade_date += timedelta(days=1)
-
-                            occupied_dates.add(grade_date)
-
-                            grade = Grade(
-                                date=grade_date.isoformat(),
-                                grade=mark["VALUE"],
-                                weight=mark["WEIGHT"],
-                            )
-
-                            grades.append(grade)
-
-                        grades_by_subject.append(
-                            NewGrade(subject=subject, grades=grades)
-                        )
-                    return grades_by_subject
-            else:
-                logger.error(f"Unexpected response status: {response.status}")
-                logger.debug(f"Response content: {await response.text()}")
+        if "data" in result:
+            grades_by_subject = []
+            for item in result["data"]:
+                subject = item["SUBJECT_NAME"]
+                grades = []
+                occupied_dates = set()
+                for mark in item["MARKS"]:
+                    grade_date = datetime.strptime(mark["DATE"], "%d.%m.%Y").date()
+                    while grade_date in occupied_dates:
+                        grade_date += timedelta(days=1)
+                    occupied_dates.add(grade_date)
+                    grade = Grade(
+                        date=grade_date.isoformat(),
+                        grade=mark["VALUE"],
+                        weight=mark["WEIGHT"],
+                    )
+                    grades.append(grade)
+                grades_by_subject.append(NewGrade(subject=subject, grades=grades))
+            return grades_by_subject
 
     logger.warning("No grades returned.")
     return []

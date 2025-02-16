@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, Message
 
 import settings
 from db.manager import db_manager
+from scheduler.methods.grade_control import toggle_grade_checking, is_grade_checking_enabled
 from tg.bot import bot
 from tg.common.keyboards.admin_keyboards import (TaskCallbackData,
                                                  get_admin_keyboard,
@@ -33,9 +34,25 @@ async def admin_menu(message: Message | CallbackQuery):
         await bot.send_message(
             chat_id=message.from_user.id,
             text=f"👤 Количество пользователей: {len(await db_manager.users.get_all_users())}\n"
-            f"📖 Пользователи, которые подключили дневник: {len(await db_manager.users.get_users_diary_connected())}\n"
-            f"📚 Активные таски: {tasks_str}\n",
+                 f"📖 Пользователи, которые подключили дневник: {len(await db_manager.users.get_users_diary_connected())}\n"
+                 f"📚 Активные таски: {tasks_str}\n"
+                 f"🔧 Проверка оценок включена: {'Включена' if is_grade_checking_enabled else 'Выключена'}\n",
             reply_markup=keyboard,
+        )
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text="Админ меню. Используйте /togglegrades для включения/выключения проверки оценок."
+        )
+
+
+@admin_router.message(Command("togglegrades"))
+async def toggle_grades(message: Message):
+    if message.from_user.id == int(settings.ADMIN_ID):
+        new_state = await toggle_grade_checking()
+        status_text = "включена" if new_state else "выключена"
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text=f"Проверка оценок теперь {status_text}."
         )
 
 
@@ -148,4 +165,3 @@ async def link_diary_admin(message: Message, state: FSMContext):
             chat_id=message.from_user.id, text=f"Дневник не привязан: {e}"
         )
     await state.clear()
-
