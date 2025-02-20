@@ -3,13 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-alembic.ini
 # C extensions
 *.so
 gradeks_dev/
 gradeks_connect/
 # Distribution / packaging
-migration
 
 .Python
 build/
