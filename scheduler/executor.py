@@ -67,9 +67,9 @@ class SafeRequestExecutor:
                         continue
 
             except aiohttp.ClientError as e:
-                key = f"ClientError: {str(e)}"
+                key = "ClientError"
                 self.error_counts[key] = self.error_counts.get(key, 0) + 1
-                logger.exception("ClientError: %s. Ошибка %s повторений", e, self.error_counts[key])
+                logger.exception("ClientError. Ошибка %s повторений", self.error_counts[key])
                 if self.error_counts[key] >= self.error_threshold:
                     if not self.notified_errors.get(key, False):
                         await self.notify_admin(key, self.error_counts[key])
