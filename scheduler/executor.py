@@ -22,6 +22,7 @@ class SafeRequestExecutor:
         self.error_threshold = error_threshold
         self.rate_limit_wait = rate_limit_wait
         self.retry_wait = retry_wait
+        self.notified_errors: Dict[str, int] = {}
 
     async def post(
         self,
@@ -35,13 +36,15 @@ class SafeRequestExecutor:
         Выполняет POST-запрос с обработкой ошибок.
 
         - При статусе 429 ждёт rate_limit_wait секунд и повторяет запрос.
-        - При других ошибках увеличивает счётчик этой ошибки и, если превышен порог, оповещает администратора и прекращает попытки.
+        - При других ошибках увеличивает счётчик этой ошибки и, если превышен порог,
+          оповещает администратора один раз с информацией о количестве повторов.
         """
         while True:
             try:
                 async with self.session.post(url, json=json, headers=headers, proxy=proxy) as response:
                     if response.status == 200:
                         self.error_counts.clear()
+                        self.notified_errors.clear()
                         return await response.json()
 
                     elif response.status == 429:
@@ -51,10 +54,14 @@ class SafeRequestExecutor:
                     else:
                         key = f"HTTP_{response.status}"
                         self.error_counts[key] = self.error_counts.get(key, 0) + 1
-                        logger.error("Получен HTTP статус %s. Ошибка %s повторений: %s", response.status, self.error_counts[key], await response.text())
+                        response_text = await response.text()
+                        logger.error("Получен HTTP статус %s. Ошибка %s повторений: %s",
+                                     response.status, self.error_counts[key], response_text)
                         if self.error_counts[key] >= self.error_threshold:
-                            await self.notify_admin(key)
-                            raise Exception(f"Превышен порог ошибок для {key}")
+                            if key not in self.notified_errors:
+                                await self.notify_admin(key, self.error_counts[key])
+                                self.notified_errors[key] = self.error_counts[key]
+                            raise Exception(f"Превышен порог ошибок для {key} (повторов: {self.error_counts[key]})")
                         await asyncio.sleep(self.retry_wait)
                         continue
 
@@ -63,15 +70,17 @@ class SafeRequestExecutor:
                 self.error_counts[key] = self.error_counts.get(key, 0) + 1
                 logger.exception("ClientError: %s. Ошибка %s повторений", e, self.error_counts[key])
                 if self.error_counts[key] >= self.error_threshold:
-                    await self.notify_admin(key)
+                    if key not in self.notified_errors:
+                        await self.notify_admin(key, self.error_counts[key])
+                        self.notified_errors[key] = self.error_counts[key]
                     raise
                 await asyncio.sleep(self.retry_wait)
 
-    async def notify_admin(self, error_identifier: str):
+    async def notify_admin(self, error_identifier: str, count: int):
         """
         Оповещает администратора о постоянной ошибке.
-        Здесь можно реализовать отправку уведомления через Telegram или другой канал.
+        Отправляется одно сообщение с указанием ошибки и количества повторений.
         """
-        logger.error("Оповещаю администратора о постоянной ошибке: %s", error_identifier)
-        await bot.send_message(settings.ADMIN_ID, f"Постоянная ошибка: {error_identifier}")
-        pass
+        message = f"Постоянная ошибка: {error_identifier} повторилась {count} раз."
+        logger.error("Оповещаю администратора: %s", message)
+        await bot.send_message(settings.ADMIN_ID, message)
