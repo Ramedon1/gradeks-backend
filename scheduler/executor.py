@@ -22,7 +22,7 @@ class SafeRequestExecutor:
         self.error_threshold = error_threshold
         self.rate_limit_wait = rate_limit_wait
         self.retry_wait = retry_wait
-        self.notified_errors: Dict[str, int] = {}
+        self.notified_errors: Dict[str, bool] = {}
 
     async def post(
         self,
@@ -37,7 +37,7 @@ class SafeRequestExecutor:
 
         - При статусе 429 ждёт rate_limit_wait секунд и повторяет запрос.
         - При других ошибках увеличивает счётчик этой ошибки и, если превышен порог,
-          оповещает администратора один раз с информацией о количестве повторов.
+          отправляет уведомление об ошибке только один раз с информацией о количестве повторений.
         """
         while True:
             try:
@@ -58,9 +58,10 @@ class SafeRequestExecutor:
                         logger.error("Получен HTTP статус %s. Ошибка %s повторений: %s",
                                      response.status, self.error_counts[key], response_text)
                         if self.error_counts[key] >= self.error_threshold:
-                            if key not in self.notified_errors:
+                            # Если уведомление для этого типа ошибки еще не отправлялось, отправляем один раз
+                            if not self.notified_errors.get(key, False):
                                 await self.notify_admin(key, self.error_counts[key])
-                                self.notified_errors[key] = self.error_counts[key]
+                                self.notified_errors[key] = True
                             raise Exception(f"Превышен порог ошибок для {key} (повторов: {self.error_counts[key]})")
                         await asyncio.sleep(self.retry_wait)
                         continue
@@ -70,16 +71,16 @@ class SafeRequestExecutor:
                 self.error_counts[key] = self.error_counts.get(key, 0) + 1
                 logger.exception("ClientError: %s. Ошибка %s повторений", e, self.error_counts[key])
                 if self.error_counts[key] >= self.error_threshold:
-                    if key not in self.notified_errors:
+                    if not self.notified_errors.get(key, False):
                         await self.notify_admin(key, self.error_counts[key])
-                        self.notified_errors[key] = self.error_counts[key]
+                        self.notified_errors[key] = True
                     raise
                 await asyncio.sleep(self.retry_wait)
 
     async def notify_admin(self, error_identifier: str, count: int):
         """
-        Оповещает администратора о постоянной ошибке.
-        Отправляется одно сообщение с указанием ошибки и количества повторений.
+        Отправляет уведомление администратору о постоянной ошибке всего один раз для каждого типа ошибки.
+        Сообщение содержит тип ошибки и количество повторов.
         """
         message = f"Постоянная ошибка: {error_identifier} повторилась {count} раз."
         logger.error("Оповещаю администратора: %s", message)
