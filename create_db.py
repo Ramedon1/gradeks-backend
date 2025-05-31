@@ -10,7 +10,6 @@ from db.session import engine
 
 
 async def main() -> None:
-
     async with db_manager.session() as session:
         # Create and add quarters
         quarters = [

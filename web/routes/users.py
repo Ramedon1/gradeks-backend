@@ -12,13 +12,22 @@ from tg.bot import bot
 from tg.common.keyboards.web_app_keyboard import go_web_app
 from web.depends.access_token import current_user_id
 from web.exceptions.grades import GradeTypeException
-from web.exceptions.users import DiaryIdDException
+from web.exceptions.users import (
+    DiaryIdException,
+    UserNotFoundException,
+    UserInactiveException,
+)
 from web.methods.create_user import create_users
 from web.methods.fetch_user_data import fetch_user_data
 from web.methods.get_diary_info import get_diary_info
 from web.models.users.login import LoginRequest, LoginResponse
-from web.models.users.user import (DiaryConnect, GradeTypeFilter, LinkDiary,
-                                   SpecDiaryInfo, UserInfo)
+from web.models.users.user import (
+    DiaryConnect,
+    GradeTypeFilter,
+    LinkDiary,
+    SpecDiaryInfo,
+    UserInfo,
+)
 
 user_router = APIRouter(prefix="/user", tags=["user"])
 
@@ -46,26 +55,29 @@ async def login(login_data: LoginRequest) -> LoginResponse:
 
 @user_router.post("/me")
 async def get_me(
-        user_id: Annotated[str, Depends(current_user_id)], request: GradeTypeFilter
+    user_id: Annotated[str, Depends(current_user_id)],
+    request: GradeTypeFilter,
 ) -> UserInfo:
     user = await db_manager.users.get_user(user_id)
+    if user is None:
+        raise UserNotFoundException
 
-    if user.is_active is False:
-        return UserInfo(is_active=user.is_active)
+    if not user.is_active:
+        raise UserInactiveException
 
     if request.filter not in PeriodsEnum.__members__:
-        raise GradeTypeException
+        raise GradeTypeException()
 
     return await fetch_user_data(user_id, request.filter)
 
 
 @user_router.post("/link")
 async def link_diary(
-        user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
+    user_id: Annotated[str, Depends(current_user_id)], request: DiaryConnect
 ) -> LinkDiary:
     match = re.search(r"participant=([\w\d]+)", request.diary_id)
     if not match:
-        raise DiaryIdDException
+        raise DiaryIdException
 
     diary_id = match.group(1)
 

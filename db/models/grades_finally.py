@@ -5,7 +5,6 @@ from sqlmodel import Field, SQLModel
 
 
 class GradesFinally(SQLModel, table=True):
-
     __tablename__ = "grades_finally"
 
     grade_finally_id: UUID4 = Field(default_factory=uuid.uuid4, primary_key=True)

@@ -34,7 +34,9 @@ async def get_grades_by_period(
         "Accept-Encoding": "gzip, deflate, br",
     }
 
-    async with aiohttp.ClientSession(headers=headers, timeout=aiohttp.ClientTimeout(total=80)) as session:
+    async with aiohttp.ClientSession(
+        headers=headers, timeout=aiohttp.ClientTimeout(total=80)
+    ) as session:
         executor = SafeRequestExecutor(session)
         try:
             result = await executor.post(

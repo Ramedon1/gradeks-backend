@@ -5,8 +5,13 @@ from pydantic import ValidationError
 
 from db.manager import db_manager
 from rediska import redis_manager
-from web.models.users.user import (FinallyGrade, InfoFinallyGrade, NewGrade,
-                                   ReferralInfo, SpecDiaryInfo)
+from web.models.users.user import (
+    FinallyGrade,
+    InfoFinallyGrade,
+    NewGrade,
+    ReferralInfo,
+    SpecDiaryInfo,
+)
 
 
 async def get_distribution(user_id: str) -> bool:

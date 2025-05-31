@@ -1,9 +1,13 @@
 import asyncio
 
 from web.methods.get_diary_info import get_diary_info
-from web.methods.get_user_info import (get_distribution, get_final_grades,
-                                       get_new_grades, get_spec_diary_info,
-                                       get_special_referrals)
+from web.methods.get_user_info import (
+    get_distribution,
+    get_final_grades,
+    get_new_grades,
+    get_spec_diary_info,
+    get_special_referrals,
+)
 from web.models.users.user import UserInfo
 
 

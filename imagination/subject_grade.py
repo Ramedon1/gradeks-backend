@@ -1,7 +1,11 @@
 from PIL import Image, ImageDraw, ImageFont
 
-from imagination.common import (badge_line, create_badge, get_color_grade,
-                                get_dynamic_font)
+from imagination.common import (
+    badge_line,
+    create_badge,
+    get_color_grade,
+    get_dynamic_font,
+)
 from web.models.users.user import GradesInfo
 
 

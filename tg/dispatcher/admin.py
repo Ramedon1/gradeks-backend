@@ -7,11 +7,16 @@ from aiogram.types import CallbackQuery, Message
 
 import settings
 from db.manager import db_manager
-from scheduler.methods.grade_control import toggle_grade_checking, is_grade_checking_enabled
+from scheduler.methods.grade_control import (
+    toggle_grade_checking,
+    is_grade_checking_enabled,
+)
 from tg.bot import bot
-from tg.common.keyboards.admin_keyboards import (TaskCallbackData,
-                                                 get_admin_keyboard,
-                                                 get_tasks_keyboard)
+from tg.common.keyboards.admin_keyboards import (
+    TaskCallbackData,
+    get_admin_keyboard,
+    get_tasks_keyboard,
+)
 from tg.dispatcher.states import AdminLinkDiaryStates
 from web.models.users.user import DiaryConnect
 from web.routes.users import link_diary
@@ -34,14 +39,14 @@ async def admin_menu(message: Message | CallbackQuery):
         await bot.send_message(
             chat_id=message.from_user.id,
             text=f"👤 Количество пользователей: {len(await db_manager.users.get_all_users())}\n"
-                 f"📖 Пользователи, которые подключили дневник: {len(await db_manager.users.get_users_diary_connected())}\n"
-                 f"📚 Активные таски: {tasks_str}\n"
-                 f"🔧 Проверка оценок включена: {'Включена' if is_grade_checking_enabled else 'Выключена'}\n",
+            f"📖 Пользователи, которые подключили дневник: {len(await db_manager.users.get_users_diary_connected())}\n"
+            f"📚 Активные таски: {tasks_str}\n"
+            f"🔧 Проверка оценок включена: {'Включена' if is_grade_checking_enabled else 'Выключена'}\n",
             reply_markup=keyboard,
         )
         await bot.send_message(
             chat_id=message.from_user.id,
-            text="Админ меню. Используйте /togglegrades для включения/выключения проверки оценок."
+            text="Админ меню. Используйте /togglegrades для включения/выключения проверки оценок.",
         )
 
 
@@ -51,8 +56,7 @@ async def toggle_grades(message: Message):
         new_state = await toggle_grade_checking()
         status_text = "включена" if new_state else "выключена"
         await bot.send_message(
-            chat_id=message.from_user.id,
-            text=f"Проверка оценок теперь {status_text}."
+            chat_id=message.from_user.id, text=f"Проверка оценок теперь {status_text}."
         )
 
 

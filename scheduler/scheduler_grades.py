@@ -3,7 +3,10 @@ import logging
 
 from db.manager import db_manager
 from scheduler.methods.common import get_full_year
-from scheduler.methods.grade_control import GRADE_CHECKING_ENABLED, is_grade_checking_enabled
+from scheduler.methods.grade_control import (
+    GRADE_CHECKING_ENABLED,
+    is_grade_checking_enabled,
+)
 from scheduler.methods.grades import update_grades
 from scheduler.methods.web import get_grades_by_period
 
@@ -23,7 +26,9 @@ async def process_user_grades(user):
         except asyncio.CancelledError:
             raise
         except Exception as e:
-            logger.error(f"Ошибка при обновлении оценок для пользователя {user.user_id}: {e}")
+            logger.error(
+                f"Ошибка при обновлении оценок для пользователя {user.user_id}: {e}"
+            )
 
 
 async def update_grades_task():

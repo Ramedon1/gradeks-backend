@@ -1,0 +1,12 @@
+[tool.isort]
+profile = "black"
+known_first_party = [
+	"my_package_app",
+	"my_package_lib",
+	"my_package_util",
+]
+
+[tool.ruff]
+exclude = [
+    "env.py",
+]

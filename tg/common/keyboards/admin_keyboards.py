@@ -1,6 +1,5 @@
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           WebAppInfo)
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 
 class TaskCallbackData(CallbackData, prefix="task"):

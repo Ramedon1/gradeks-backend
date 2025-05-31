@@ -28,8 +28,8 @@ async def log_task_exception(task: asyncio.Task):
         logging.error(task.exception())
         exception_message = str(task.exception())
 
-        sanitized_message = re.sub(r'<.*?>', '', exception_message)
-        sanitized_message = sanitized_message.replace('\n', ' ')
+        sanitized_message = re.sub(r"<.*?>", "", exception_message)
+        sanitized_message = sanitized_message.replace("\n", " ")
 
         await bot.send_message(
             chat_id=settings.ADMIN_ID,

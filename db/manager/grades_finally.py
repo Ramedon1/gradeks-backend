@@ -10,12 +10,12 @@ from db.models.grades_finally import GradesFinally
 
 class DbManagerGradesFinally(DbManagerBase):
     async def add_finally_grade(
-            self,
-            user_id: str | UUID,
-            grade: int,
-            subject: str,
-            quarter: str,
-            outer_session: AsyncSession | None = None,
+        self,
+        user_id: str | UUID,
+        grade: int,
+        subject: str,
+        quarter: str,
+        outer_session: AsyncSession | None = None,
     ) -> GradesFinally:
         async with self.session_manager(outer_session) as session:  # type: AsyncSession
             new_finally_grade = GradesFinally(
@@ -27,7 +27,7 @@ class DbManagerGradesFinally(DbManagerBase):
             return new_finally_grade
 
     async def get_finally_grades_by_user_id(
-            self, user_id: str | UUID, outer_session: AsyncSession | None = None
+        self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> list[GradesFinally]:
         async with self.session_manager(outer_session) as session:
             statement = select(GradesFinally).where(GradesFinally.user_id == user_id)
@@ -36,12 +36,12 @@ class DbManagerGradesFinally(DbManagerBase):
             return grades
 
     async def change_finally_grade(
-            self,
-            user_id: str | UUID,
-            new_grade: int,
-            subject: str,
-            quarter: str,
-            outer_session: AsyncSession | None = None,
+        self,
+        user_id: str | UUID,
+        new_grade: int,
+        subject: str,
+        quarter: str,
+        outer_session: AsyncSession | None = None,
     ) -> GradesFinally | None:
         async with self.session_manager(outer_session) as session:
             statement = (
@@ -60,7 +60,7 @@ class DbManagerGradesFinally(DbManagerBase):
             return None
 
     async def delete_finally_grades_by_user_id(
-            self, user_id: str | UUID, outer_session: AsyncSession | None = None
+        self, user_id: str | UUID, outer_session: AsyncSession | None = None
     ) -> None:
         async with self.session_manager(outer_session) as session:
             statement = select(GradesFinally).where(GradesFinally.user_id == user_id)

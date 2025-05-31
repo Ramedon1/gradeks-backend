@@ -68,7 +68,7 @@ async def update_grades(user_id, new_grades):
             try:
                 await bot.send_message(
                     chat_id=telegram_id,
-                    text=f'🔃 Обновили оценку на {key[1].strftime("%d.%m.%Y")}. \n'
+                    text=f"🔃 Обновили оценку на {key[1].strftime('%d.%m.%Y')}. \n"
                     f"📚 Предмет: {existing_grade.subject} \n"
                     f"Была оценка: {existing_grade.grade} | Стала оценка: {new_grade_entry.grade} | Вес оценки: {new_grade_entry.weight}",
                     reply_markup=go_web_app(),
@@ -102,7 +102,7 @@ async def update_grades(user_id, new_grades):
                 chat_id=telegram_id,
                 text=f"🗓 Новая оценка. \n"
                 f"📚 Предмет: {new_db_grade.subject} \n"
-                f'Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime("%d.%m.%Y")} | Вес оценки: {new_db_grade.grade_weight}',
+                f"Оценка: {new_db_grade.grade} | {new_db_grade.grading_date.strftime('%d.%m.%Y')} | Вес оценки: {new_db_grade.grade_weight}",
                 reply_markup=go_web_app(),
             )
         except:
@@ -117,7 +117,7 @@ async def update_grades(user_id, new_grades):
                 chat_id=telegram_id,
                 text=f"🗑 Удалена оценка \n"
                 f"📚 Предмет: {existing_grade.subject} \n"
-                f'Оценка: {existing_grade.grade} | {existing_grade.grading_date.strftime("%d.%m.%Y")}',
+                f"Оценка: {existing_grade.grade} | {existing_grade.grading_date.strftime('%d.%m.%Y')}",
                 reply_markup=go_web_app(),
             )
         except:
@@ -273,19 +273,19 @@ async def add_finally_grades(user_id: str | UUID, diary_id: str):
     """
     new_grades = await get_final_grades(diary_id)
 
-
     if not new_grades:
         logger.info(f"No final grades to add for user_id: {user_id}")
         raise "Failed to get grades from web"
 
     logger.info(f"Adding final grades for user_id: {user_id}")
 
-    existing_diary = await db_manager.grades_finally.get_finally_grades_by_user_id(user_id)
+    existing_diary = await db_manager.grades_finally.get_finally_grades_by_user_id(
+        user_id
+    )
 
     if len(existing_diary) > 0:
         await db_manager.users.disconnect_diary(user_id)
         await db_manager.grades_finally.delete_finally_grades_by_user_id(user_id)
-
 
     for grade_final in new_grades:
         subject = grade_final.subject

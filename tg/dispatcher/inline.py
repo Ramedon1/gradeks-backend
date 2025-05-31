@@ -3,9 +3,15 @@ from io import BytesIO
 from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
-from aiogram.types import (BufferedInputFile, ChosenInlineResult, FSInputFile,
-                           InlineQuery, InlineQueryResultCachedAudio,
-                           InputMediaPhoto, Message)
+from aiogram.types import (
+    BufferedInputFile,
+    ChosenInlineResult,
+    FSInputFile,
+    InlineQuery,
+    InlineQueryResultCachedAudio,
+    InputMediaPhoto,
+    Message,
+)
 
 from db.manager import db_manager
 from imagination.day_grade import day_grade_img
@@ -13,8 +19,11 @@ from imagination.quarter_grade import img_quarter_grade
 from imagination.subject_grade import subject_grade_img
 from tg.bot import bot
 from tg.common.keyboards.inline_keyboard import inline_send
-from web.methods.get_diary_info import (get_diary_info_by_period,
-                                        get_new_grade, get_old_grade)
+from web.methods.get_diary_info import (
+    get_diary_info_by_period,
+    get_new_grade,
+    get_old_grade,
+)
 from web.methods.get_user_info import get_new_grades
 
 inline_router = Router()

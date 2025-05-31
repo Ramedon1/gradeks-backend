@@ -9,13 +9,14 @@ from tg.bot import bot
 
 logger = logging.getLogger(__name__)
 
+
 class SafeRequestExecutor:
     def __init__(
         self,
         session: aiohttp.ClientSession,
         error_threshold: int = 3,
         rate_limit_wait: int = 60,
-        retry_wait: int = 5
+        retry_wait: int = 5,
     ):
         self.session = session
         self.error_counts: Dict[str, int] = {}
@@ -41,35 +42,48 @@ class SafeRequestExecutor:
         """
         while True:
             try:
-                async with self.session.post(url, json=json, headers=headers, proxy=proxy) as response:
+                async with self.session.post(
+                    url, json=json, headers=headers, proxy=proxy
+                ) as response:
                     if response.status == 200:
                         self.error_counts.clear()
                         self.notified_errors.clear()
                         return await response.json()
 
                     elif response.status == 429:
-                        logger.warning("Получен статус 429 (rate limit). Ожидание %s секунд...", self.rate_limit_wait)
+                        logger.warning(
+                            "Получен статус 429 (rate limit). Ожидание %s секунд...",
+                            self.rate_limit_wait,
+                        )
                         await asyncio.sleep(self.rate_limit_wait)
                         continue
                     else:
                         key = f"HTTP_{response.status}"
                         self.error_counts[key] = self.error_counts.get(key, 0) + 1
                         response_text = await response.text()
-                        logger.error("Получен HTTP статус %s. Ошибка %s повторений: %s",
-                                     response.status, self.error_counts[key], response_text)
+                        logger.error(
+                            "Получен HTTP статус %s. Ошибка %s повторений: %s",
+                            response.status,
+                            self.error_counts[key],
+                            response_text,
+                        )
                         if self.error_counts[key] >= self.error_threshold:
                             # Если уведомление для этого типа ошибки еще не отправлялось, отправляем один раз
                             if not self.notified_errors.get(key, False):
                                 await self.notify_admin(key, self.error_counts[key])
                                 self.notified_errors[key] = True
-                            raise Exception(f"Превышен порог ошибок для {key} (повторов: {self.error_counts[key]})")
+                            raise Exception(
+                                f"Превышен порог ошибок для {key} (повторов: {self.error_counts[key]})"
+                            )
                         await asyncio.sleep(self.retry_wait)
                         continue
 
             except aiohttp.ClientError as e:
                 key = "ClientError"
                 self.error_counts[key] = self.error_counts.get(key, 0) + 1
-                logger.exception("ClientError. Ошибка %s повторений", self.error_counts[key])
+                logger.exception(
+                    "ClientError. Ошибка %s повторений", self.error_counts[key]
+                )
                 if self.error_counts[key] >= self.error_threshold:
                     if not self.notified_errors.get(key, False):
                         await self.notify_admin(key, self.error_counts[key])

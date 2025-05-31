@@ -42,3 +42,20 @@ class User(SQLModel, table=True):
     grade_type: str = Field(default="new", nullable=False)
     # Telegram Auth
     telegram_hash: str = Field(nullable=False, default=None, max_length=255)
+
+
+class UsersAvatar(SQLModel, table=True):
+    """
+    Аватарки пользователя
+
+    Attributes:
+        avatar_id (UUID): внутренний идентификатор аватарки
+        user_id (UUID): внутренний идентификатор пользователя
+        avatar (str): аватар ссылкой на тг аватар
+    """
+
+    __tablename__ = "users_avatar"
+
+    avatar_id: UUID4 = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: UUID4 = Field(foreign_key="users.user_id", nullable=False)
+    avatar: str = Field(nullable=False)

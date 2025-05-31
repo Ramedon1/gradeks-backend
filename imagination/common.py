@@ -10,6 +10,10 @@ def get_color_grade(grade: int | float) -> str:
         return "#FC0"
     if grade >= 2:
         return "#ff4d4d"
+    if grade >= 1:
+        return "#ff4d4d"
+    if grade >= 0:
+        return "#0ca139"
     return "#000"
 
 
@@ -97,8 +101,8 @@ def create_badge(grade: int, coff: int) -> Image:
         fill=notification_color,
     )
 
-    font_large = ImageFont.truetype("imagination/fonts/DMSans_24pt-Black.ttf", 40)
-    font_small = ImageFont.truetype("imagination/fonts/DMSans_24pt-Black.ttf", 23)
+    font_large = ImageFont.truetype("../imagination/fonts/DMSans_24pt-Black.ttf", 40)
+    font_small = ImageFont.truetype("../imagination/fonts/DMSans_24pt-Black.ttf", 23)
 
     text = str(grade)
     text_bbox = draw.textbbox((0, 0), text, font=font_large)
@@ -172,11 +176,11 @@ def subject_with_line_grades(
     subject_name: str,
     image_line: list[Image.Image],
     max_width: int,
-    new_type_grade: float,
-    old_type_grade: float,
+    new_type_grade: float | None,
+    old_type_grade: float | None,
 ):
     # Calculate dimensions for the subject text
-    font = ImageFont.truetype("imagination/fonts/PFEncoreSansPro-Medium.ttf", 60)
+    font = ImageFont.truetype("../imagination/fonts/PFEncoreSansPro-Medium.ttf", 60)
     temp_image = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
     draw = ImageDraw.Draw(temp_image)
 
@@ -197,39 +201,48 @@ def subject_with_line_grades(
     img = Image.new("RGBA", (final_width + 50, final_height), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
 
-    grades_font = ImageFont.truetype("imagination/fonts/PFEncoreSansPro-Medium.ttf", 45)
-    # Grades as separate parts with a slash
-    new_grade_text = f"{new_type_grade:.1f}"
-    old_grade_text = f"{old_type_grade:.1f}"
-    slash_text = " / "
+    grades_font = ImageFont.truetype(
+        "../imagination/fonts/PFEncoreSansPro-Medium.ttf", 45
+    )
 
-    # Colors for each grade
-    new_grade_color = get_color_grade(new_type_grade)
-    old_grade_color = get_color_grade(old_type_grade)
-
-    # Calculate text widths
-    new_grade_width = draw.textlength(new_grade_text, font=grades_font)
-    slash_width = draw.textlength(slash_text, font=grades_font)
-    old_grade_width = draw.textlength(old_grade_text, font=grades_font)
-
-    # Position grades on the right side (offset from the subject text)
-    grades_x = subject_bbox[2] + 40
+    # Initialize grade-related variables
+    grades_x = subject_bbox[2] + 40  # Starting x position for grades
     grades_y = subject_height // 2 - (subject_height // 4)
-    draw.text(
-        (grades_x, grades_y), new_grade_text, font=grades_font, fill=new_grade_color
-    )
-    draw.text(
-        (grades_x + new_grade_width, grades_y),
-        slash_text,
-        font=grades_font,
-        fill="white",
-    )
-    draw.text(
-        (grades_x + new_grade_width + slash_width, grades_y),
-        old_grade_text,
-        font=grades_font,
-        fill=old_grade_color,
-    )
+    x_offset = 0
+
+    if new_type_grade is not None:
+        new_grade_text = f"{new_type_grade:.1f}"
+        new_grade_color = get_color_grade(new_type_grade)
+        new_grade_width = draw.textlength(new_grade_text, font=grades_font)
+
+        draw.text(
+            (grades_x + x_offset, grades_y),
+            new_grade_text,
+            font=grades_font,
+            fill=new_grade_color,
+        )
+        x_offset += new_grade_width  # Adjust offset for the next text
+
+    if new_type_grade is not None and old_type_grade is not None:
+        slash_text = " / "
+        slash_width = draw.textlength(slash_text, font=grades_font)
+        draw.text(
+            (grades_x + x_offset, grades_y),
+            slash_text,
+            font=grades_font,
+            fill="white",
+        )
+        x_offset += slash_width  # Adjust offset for the next text
+
+    if old_type_grade is not None:
+        old_grade_text = f"{old_type_grade:.1f}"
+        old_grade_color = get_color_grade(old_type_grade)
+        draw.text(
+            (grades_x + x_offset, grades_y),
+            old_grade_text,
+            font=grades_font,
+            fill=old_grade_color,
+        )
 
     # Draw the subject name aligned with the badge line's start
     text_x = 20  # A little padding from the left
@@ -242,3 +255,70 @@ def subject_with_line_grades(
     img.paste(badge_line_image, (badge_line_x, badge_line_y), mask=badge_line_image)
 
     return img.convert("RGBA")
+
+
+def create_grade_badge(grade: int):
+    base_size = 200
+
+    font_path = "../imagination/fonts/PFEncoreSansPro-Medium.ttf"
+    font_size = 95
+    font = ImageFont.truetype(font_path, font_size)
+
+    text = str(grade if grade >= 1 else "Зачёт")
+
+    text_bbox = font.getbbox(text)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    padding = 20
+    square_size = max(base_size, text_width + padding * 2, text_height + padding * 2)
+
+    image = Image.new("RGBA", (square_size, square_size), (255, 255, 255, 0))
+
+    draw = ImageDraw.Draw(image)
+    corner_radius = square_size // 5
+    draw.rounded_rectangle(
+        (0, 0, square_size, square_size),
+        radius=corner_radius,
+        fill=get_color_grade(grade),
+    )
+
+    text_position = (
+        (square_size - text_width) // 2,
+        (square_size - text_height) // 2 - 5,
+    )
+
+    draw.text(text_position, text, fill="white", font=font)
+
+    return image
+
+
+def create_subject_with_grade_badge(subject_name: str, grade_badge: Image.Image):
+    font_path = "../imagination/fonts/PFEncoreSansPro-Medium.ttf"
+    font_size = 120
+    font = ImageFont.truetype(font_path, font_size)
+
+    # Determine text dimensions
+    text_bbox = font.getbbox(subject_name)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    # Badge size
+    badge_width, badge_height = grade_badge.size
+
+    padding = 160
+    total_width = text_width + badge_width + padding
+    total_height = max(text_height, badge_height)
+
+    # Create a transparent image canvas
+    image = Image.new("RGBA", (total_width, total_height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(image)
+
+    # Draw the subject name
+    text_position = (0, (total_height - text_height) // 2)
+    draw.text(text_position, subject_name, fill="white", font=font)
+
+    # Paste the grade badge to the right of the text
+    badge_position = (text_width + padding, (total_height - badge_height) // 2)
+    image.paste(grade_badge, badge_position, mask=grade_badge)
+    return image

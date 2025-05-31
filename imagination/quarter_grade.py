@@ -1,7 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 
-from imagination.common import (create_badge, get_dynamic_font,
-                                subject_with_line_grades)
+from imagination.common import create_badge, get_dynamic_font, subject_with_line_grades
 from web.models.users.user import DiaryInfo
 
 
