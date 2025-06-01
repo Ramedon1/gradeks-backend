@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.manager.base import DbManagerBase
-from db.manager.distribution import DbManagerDistribution
 from db.manager.grades import DbManagerGrades
 from db.manager.grades_finally import DbManagerGradesFinally
 from db.manager.leaderboard import DbManagerLeaderboard
@@ -20,9 +19,6 @@ class DbManager:
         self.engine = db_engine
         self.users: DbManagerUsers = DbManagerUsers(db_engine, self)
         self.grades: DbManagerGrades = DbManagerGrades(db_engine, self)
-        self.distribution: DbManagerDistribution = DbManagerDistribution(
-            db_engine, self
-        )
         self.base: DbManagerBase = DbManagerBase(db_engine, self)
         self.referral: DbManagerReferrals = DbManagerReferrals(db_engine, self)
         self.periods: DbManagerPeriods = DbManagerPeriods(db_engine, self)
